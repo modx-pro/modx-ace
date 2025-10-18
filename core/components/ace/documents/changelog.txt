@@ -1,5 +1,9 @@
 Changelog for Ace (https://github.com/modx-pro/modx-ace) integration into MODX Revolution.
 
+Ace 1.9.5 [18.10.2025]
+====================================
+- Feat: Added format code by Ctrl-Shift-B (CMD + Shift + B on Mac)
+
 Ace 1.9.4 [23.02.2024]
 ====================================
 - Feat: Added links on GitHub [#13]
