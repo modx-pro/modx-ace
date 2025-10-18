@@ -28,6 +28,15 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
 
     style: 'padding:0',
 
+    beatify : function() {
+        var val = this.editor.session.getValue();
+        var array = val.split(/\n/);
+        array[0] = array[0].trim();
+        val = array.join("\n");
+        val = html_beautify(val);
+        this.editor.session.setValue(val);
+    },
+
     initEvents : function(){
         Ext.ux.Ace.superclass.initEvents.call(this);
         this.editor.on('focus', this.onFocus.bind(this));
@@ -378,7 +387,14 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
             exec: this.updatewrapmode.bind(this),
             readOnly: true
         });
-	
+
+        this.editor.commands.addCommand({
+            name: "beatify",
+            bindKey: {win: "Ctrl-Shift-B", mac: "Ctrl-Shift-B"},
+            exec: this.beatify.bind(this),
+            readOnly: true
+        });
+
     },
 
     fullScreen : function() {
