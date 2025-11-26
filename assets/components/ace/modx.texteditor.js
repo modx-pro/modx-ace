@@ -28,7 +28,7 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
 
     style: 'padding:0',
 
-    beatify : function() {
+    beautify : function() {
         var val = this.editor.session.getValue();
         var array = val.split(/\n/);
         array[0] = array[0].trim();
@@ -389,9 +389,9 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
         });
 
         this.editor.commands.addCommand({
-            name: "beatify",
+            name: "beautify",
             bindKey: {win: "Ctrl-Shift-B", mac: "Ctrl-Shift-B"},
-            exec: this.beatify.bind(this),
+            exec: this.beautify.bind(this),
             readOnly: true
         });
 

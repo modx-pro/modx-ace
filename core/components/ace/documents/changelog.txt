@@ -2,7 +2,7 @@ Changelog for Ace (https://github.com/modx-pro/modx-ace) integration into MODX R
 
 Ace 1.9.5 [18.10.2025]
 ====================================
-- Feat: Added format code by Ctrl-Shift-B (CMD + Shift + B on Mac)
+- Feat: Added format code by Ctrl-Shift-B
 
 Ace 1.9.4 [23.02.2024]
 ====================================
