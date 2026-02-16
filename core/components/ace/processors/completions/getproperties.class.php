@@ -16,7 +16,7 @@ class modCompletionsGetProperties extends modProcessor {
     public function initialize() {
         $criteria = array();
         $criteria['name'] = $this->getProperty('key');
-        $this->object = $this->modx->getObject($this->getProperty('classKey'),$criteria);
+        $this->object = $this->modx->getObject($this->getProperty('classKey'), $criteria);
         return true;
     }
 
@@ -46,7 +46,7 @@ class modCompletionsGetProperties extends modProcessor {
 
         if (!empty($propertySet)) {
             /** @var modPropertySet $set */
-            $set = $this->modx->getObject('modPropertySet',$propertySet);
+            $set = $this->modx->getObject('modPropertySet', $propertySet);
             if ($set) {
                 $setProperties = $set->get('properties');
                 if (is_array($setProperties) && !empty($setProperties)) {
@@ -59,12 +59,12 @@ class modCompletionsGetProperties extends modProcessor {
 
     /**
      * Prepare the property array for property insertion
-     * 
+     *
      * @param string $key
      * @param array $property
      * @return array
      */
-    public function prepareProperty($key,array $property) {
+    public function prepareProperty($key, array $property) {
         $desc = $property['desc_trans'] ?? '';
         if (!empty($property['lexicon'])) {
             $this->modx->lexicon->load($property['lexicon']);
@@ -73,7 +73,9 @@ class modCompletionsGetProperties extends modProcessor {
         if (is_array($property)) {
             $v = $property['value'] ?? null;
             $xtype = $property['type'] ?? null;
-        } else { $v = $property; }
+        } else {
+            $v = $property;
+        }
 
         $propertyArray = array(
             'key' => $key,
