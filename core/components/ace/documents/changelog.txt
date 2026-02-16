@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build script for MODX 2 and MODX 3 (Transport, auto-install, ClearCache)
 - Readable install log: [Ace] sections, ✓/✅ messages in resolver and build output
 - MODX root detection via `core/config/config.inc.php` when building from Extras/
+- Readme: building from MODX 2 for MODX 2 installs (optional; avoids post-pack patch)
 
 ### Changed
 - PHP 8.1–8.5: null-safe array_merge, array key and file_get_contents handling in completions processors
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unable to load processor "getResourceFields" in MODX 3 (issue #16): processors path and CamelCase file names
 - Auto-install in MODX 3: full class name `MODX\Revolution\Transport\modTransportPackage` for xPDO
 - E_DEPRECATED suppressed during CLI build (dynamic property in MODX core)
+- Package built on MODX 3 failing to install on MODX 2 (xPDOObjectVehicle could not be loaded): manifest vehicle class names patched to MODX 2 format (xpdo.transport.*) after pack; double-backslash and serialized manifest supported, array keys patched
 
 ## [1.9.5] - 2025-10-18
 

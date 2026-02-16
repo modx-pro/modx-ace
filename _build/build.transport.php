@@ -148,11 +148,111 @@ $builder->setPackageAttributes([
 $modx->log(modX::LOG_LEVEL_INFO, '[Ace] Packing transport package...');
 $builder->pack();
 
+$signature = $builder->getSignature();
+if ($isModx3 && class_exists('ZipArchive')) {
+    // MODX 2 get() uses loadClass("{$vehicle_package}.{$vehicle_class}") with default vehicle_package='transport'.
+    // So vehicle_class must be just the class name: xPDOObjectVehicle, xPDOFileVehicle (file under core/xpdo/transport/).
+    $vehicleClassMap = [
+        'transport.xPDO\Transport\xPDOObjectVehicle' => 'xPDOObjectVehicle',
+        'transport.xPDO\Transport\xPDOFileVehicle' => 'xPDOFileVehicle',
+        'transport.xPDO\Transport\xPDOTransportVehicle' => 'xPDOTransportVehicle',
+        'xPDO\Transport\xPDOObjectVehicle' => 'xPDOObjectVehicle',
+        'xPDO\Transport\xPDOFileVehicle' => 'xPDOFileVehicle',
+        'xPDO\Transport\xPDOTransportVehicle' => 'xPDOTransportVehicle',
+        'transport.xPDO\\\\Transport\\\\xPDOObjectVehicle' => 'xPDOObjectVehicle',
+        'transport.xPDO\\\\Transport\\\\xPDOFileVehicle' => 'xPDOFileVehicle',
+        'transport.xPDO\\\\Transport\\\\xPDOTransportVehicle' => 'xPDOTransportVehicle',
+        'xPDO\\\\Transport\\\\xPDOObjectVehicle' => 'xPDOObjectVehicle',
+        'xPDO\\\\Transport\\\\xPDOFileVehicle' => 'xPDOFileVehicle',
+        'xPDO\\\\Transport\\\\xPDOTransportVehicle' => 'xPDOTransportVehicle',
+        'xpdo.transport.xpdoobjectvehicle' => 'xPDOObjectVehicle',
+        'xpdo.transport.xpdofilevehicle' => 'xPDOFileVehicle',
+        'xpdo.transport.xpdotransportvehicle' => 'xPDOTransportVehicle',
+        'transport.xpdo.transport.xpdoobjectvehicle' => 'xPDOObjectVehicle',
+        'transport.xpdo.transport.xpdofilevehicle' => 'xPDOFileVehicle',
+        'transport.xpdo.transport.xpdotransportvehicle' => 'xPDOTransportVehicle',
+    ];
+    $vehiclePackageMap = [
+        'xPDO\\Transport' => 'transport',
+        'xPDO\Transport' => 'transport',
+        'transport.xPDO\\Transport' => 'transport',
+        'transport.xPDO\Transport' => 'transport',
+        'xpdo.transport' => 'transport',
+    ];
+    $modxClassMap = [
+        'MODX\\Revolution\\modNamespace' => 'modNamespace',
+        'MODX\\Revolution\\modPlugin' => 'modPlugin',
+        'MODX\\Revolution\\modPluginEvent' => 'modPluginEvent',
+        'MODX\\Revolution\\modSystemSetting' => 'modSystemSetting',
+        'MODX\\Revolution\\modCategory' => 'modCategory',
+        'MODX\\Revolution\\modSnippet' => 'modSnippet',
+        'MODX\\Revolution\\modChunk' => 'modChunk',
+        'MODX\\Revolution\\modTemplate' => 'modTemplate',
+        'MODX\\Revolution\\modTemplateVar' => 'modTemplateVar',
+        'MODX\\Revolution\\' => '',
+        'MODX\\\\Revolution\\\\' => '',
+    ];
+    $vehicleClassMap = array_merge($vehicleClassMap, $vehiclePackageMap, $modxClassMap);
+    $patchVehicleClasses = function ($value) use (&$patchVehicleClasses, $vehicleClassMap) {
+        if (is_array($value)) {
+            $out = [];
+            foreach ($value as $k => $v) {
+                $out[$patchVehicleClasses($k)] = $patchVehicleClasses($v);
+            }
+            return $out;
+        }
+        if (is_string($value)) {
+            return str_replace(array_keys($vehicleClassMap), array_values($vehicleClassMap), $value);
+        }
+        return $value;
+    };
+    $zipPath = MODX_CORE_PATH . 'packages/' . $signature . '.transport.zip';
+    if (file_exists($zipPath)) {
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath, ZipArchive::CREATE) === true) {
+            for ($i = $zip->numFiles - 1; $i >= 0; $i--) {
+                $name = $zip->getNameIndex($i);
+                $content = $zip->getFromIndex($i);
+                if ($content === false) {
+                    continue;
+                }
+                $hasVehicleClass = (strpos($content, 'xPDO') !== false && strpos($content, 'Transport') !== false)
+                    || strpos($content, 'ObjectVehicle') !== false
+                    || strpos($content, 'FileVehicle') !== false
+                    || strpos($content, 'MODX\\') !== false
+                    || strpos($content, 'MODX\\\\') !== false;
+                if (!$hasVehicleClass) {
+                    continue;
+                }
+                $newContent = null;
+                if (preg_match('/^[aOs]:\d+:/', $content)) {
+                    $data = @unserialize($content);
+                    if ($data !== false || $content === 'b:0;') {
+                        $newContent = serialize($patchVehicleClasses($data));
+                    }
+                }
+                if ($newContent === null) {
+                    $newContent = str_replace(
+                        array_keys($vehicleClassMap),
+                        array_values($vehicleClassMap),
+                        $content
+                    );
+                }
+                if ($newContent !== $content) {
+                    $zip->deleteIndex($i);
+                    $zip->addFromString($name, $newContent);
+                }
+            }
+            $zip->close();
+            $modx->log(modX::LOG_LEVEL_INFO, '[Ace] Patched transport for MODX 2 compatibility.');
+        }
+    }
+}
+
 $tend = explode(' ', microtime());
 $tend = $tend[1] + $tend[0];
 $totalTime = sprintf('%2.4f s', $tend - $tstart);
 
-$signature = $builder->getSignature();
 if (defined('PKG_AUTO_INSTALL') && PKG_AUTO_INSTALL) {
     $sig = explode('-', $signature);
     $versionSignature = explode('.', $sig[1]);
