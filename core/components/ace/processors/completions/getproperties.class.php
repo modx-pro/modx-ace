@@ -28,7 +28,7 @@ class modCompletionsGetProperties extends modProcessor {
         $list = array();
         if (!empty($properties) && is_array($properties)) {
             foreach ($properties as $key => $property) {
-                $list[$key] = $property['desc_trans'];
+                $list[$key] = $property['desc_trans'] ?? '';
             }
         }
 
@@ -41,15 +41,16 @@ class modCompletionsGetProperties extends modProcessor {
      */
     public function getObjectProperties() {
         $properties = $this->object->get('properties');
+        $properties = is_array($properties) ? $properties : array();
         $propertySet = $this->getProperty('propertySet');
-        
+
         if (!empty($propertySet)) {
             /** @var modPropertySet $set */
             $set = $this->modx->getObject('modPropertySet',$propertySet);
             if ($set) {
                 $setProperties = $set->get('properties');
                 if (is_array($setProperties) && !empty($setProperties)) {
-                    $properties = array_merge($properties,$setProperties);
+                    $properties = array_merge($properties, $setProperties);
                 }
             }
         }
@@ -64,14 +65,14 @@ class modCompletionsGetProperties extends modProcessor {
      * @return array
      */
     public function prepareProperty($key,array $property) {
-        $desc = $property['desc_trans'];
+        $desc = $property['desc_trans'] ?? '';
         if (!empty($property['lexicon'])) {
             $this->modx->lexicon->load($property['lexicon']);
         }
 
         if (is_array($property)) {
-            $v = $property['value'];
-            $xtype = $property['type'];
+            $v = $property['value'] ?? null;
+            $xtype = $property['type'] ?? null;
         } else { $v = $property; }
 
         $propertyArray = array(

@@ -1,5 +1,10 @@
 Changelog for Ace (https://github.com/modx-pro/modx-ace) integration into MODX Revolution.
 
+Ace 1.9.6 [16.02.2026]
+====================================
+- Fixed: Unable to load processor "getResourceFields" in MODX 3 (issue #16). Processors path and CamelCase file names for completions.
+- Updated: PHP 8.1–8.3 compatibility: null-safe array_merge, undefined array key handling, file_get_contents failure handling.
+
 Ace 1.9.5 [18.10.2025]
 ====================================
 - Feat: Added format code by Ctrl-Shift-B
