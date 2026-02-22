@@ -92,6 +92,7 @@ $attributes = [
     xPDOTransport::PRESERVE_KEYS => false,
     xPDOTransport::UPDATE_OBJECT => true,
     xPDOTransport::RELATED_OBJECTS => true,
+    xPDOTransport::PREEXISTING_MODE => xPDOTransport::REMOVE_PREEXISTING,
     xPDOTransport::RELATED_OBJECT_ATTRIBUTES => [
         'PluginEvents' => [
             xPDOTransport::PRESERVE_KEYS => true,
