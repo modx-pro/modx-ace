@@ -103,7 +103,7 @@ switch ($modx->event->name) {
         $modxTags = $extension == 'tpl';
         break;
     case 'OnDocFormPrerender':
-        if (!$modx->controller || !isset($modx->controller->resourceArray)) {
+        if (!$modx->controller || empty($modx->controller->resourceArray)) {
             return;
         }
         $field = 'ta';
