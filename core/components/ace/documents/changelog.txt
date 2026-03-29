@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.9] - 2026-03-29
+
+### Fixed
+- In-editor PHP syntax check: false `Syntax error, unexpected '?'` (and similar) for valid PHP 7+ code such as null coalescing `??`. Bundled `worker-php.js` updated to [ace-builds](https://www.npmjs.com/package/ace-builds) **1.37.5** (`T_COALESCE` and related tokens).
+
 ## [1.9.8] - 2026-03-05
 
 ### Fixed
