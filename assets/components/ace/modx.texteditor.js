@@ -314,7 +314,7 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
 
         if (!MODx.ux.Ace.initialized) {
             var style = "\
-                .ace_maximized {position: fixed; border: none; top: 0; left: 0; right: 0; bottom: 0; width: auto !important; height: auto !important;z-index: 100}\
+                .ace_maximized {position: fixed; border: none; top: 0; left: 0; right: 0; bottom: 0; width: auto !important; height: auto !important; margin: 0; z-index: 12000}\
                 .ace_maximizer {position: absolute; width: 16px; height: 16px; top: 3px; right: 3px; opacity: 0.7; z-index: 10; cursor: pointer; background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAABgFBMVEVmrBxkqxpjqhlkqxprryFnrB1kqxtkqxp6uzJiqRhZow9kqxpmrBxlrBtnrBxjqhlmrBxjqhptsSNkqhplqxt4tyxkqhlmrB1mrBx5uzJmrBxorR9orR5nrB1kqhlorR14uS5mrRxhqBhmrR1aoxBlqxt3titusiRlqxpiqRd4ty1rrh9hqBdjqxp3tSpaow9mrR15ujBorh5lrBxapRFmrBxkqhpjqhp5uzBhqRdnrB1rsCJlrBt6vDNorh93tipmqxxhqRhapBFbpRJnrR1mrB14uC1usiVnrB1apRFhqReq1VmLxUGv5Gyt3GOs22Cm0FKn2FyUzUyRykev4WmUz1CUy0mw5G6RzEmr11xusSOSy0iOxkKPx0Or2V6CwTuo3GGUz0+Sy0mu5W6Ry0mq1lptsCORy0iNx0OAvDOo2V5/vDOCwDmPxkOOy0mj0lWl1lqu4Gap1Viv4mms2l+s3WSPx0SKwDtusiWCwTqQxUGSyUaRykiAvDSp2l+Qx0QdWpRIAAAAS3RSTlMAAAAa4gAAlfAZMRLhuQCV1ZXwGgDwlQCy8MzY2swS2PDqEdUisvDwABn64hEA8CLh+tq5MeoAAPAZ4eKy+tr6uREiMdXq8PDqIhHgP7bQAAAA4ElEQVR42mOw5uBw52cAA351CwUWBttk30p9iIBKTmGcFgNHeEKwlBIfAwOrjmxNQaQoQ0V8TVa9PDMDg7B0RF1MdhSDGJdLfWqVqS6Ta5BfvYAzO1Arp0xVOS8bo3FGtAwnxDBuHhsRBgYNVR5uBihgZAOTTDA+AxMjiDSDCYhzW0kAtTBKGMiJgwUs7cJ8eBkZHfISjTSBXDEu5RT/akVzJo/Q4mgBE3aGisr0OqjDkupyM9MYJEMCY6UcQU73ki3LL1JjMCwtqfWEmO5U6x1gz8Ci4CYkCBEQFBLV0wYAXu4m8P20SwoAAAAASUVORK5CYII=)}\
                 .ace_maximizer:hover {opacity: 1}\
             ";
@@ -401,12 +401,63 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
         if (this.isFullscreen){
             this.maximizer.title = this.maximizeTitle;
             this.el.removeClass('ace_maximized');
+            this.restoreAceFromFullscreenBody();
         } else {
+            this.moveAceToFullscreenBody();
             this.el.addClass('ace_maximized');
             this.maximizer.title = this.minimizeTitle;
         }
         this.isFullscreen = !this.isFullscreen;
         this.onResize();
+        this.syncAceOwnerLayout();
+    },
+
+    /**
+     * Fullscreen must sit under document.body with a high z-index. A low z-index (formerly 100)
+     * and staying inside #modx-content cannot paint above sibling panels (e.g. resource TVs column)
+     * due to stacking contexts — see modx-ace#18 and modxcms/revolution#16778 discussion.
+     */
+    moveAceToFullscreenBody : function() {
+        if (this._aceFullscreenRestore) {
+            return;
+        }
+        var dom = this.el.dom;
+        this._aceFullscreenRestore = {
+            parent: dom.parentNode,
+            next: dom.nextSibling
+        };
+        document.body.appendChild(dom);
+    },
+
+    restoreAceFromFullscreenBody : function() {
+        var r = this._aceFullscreenRestore;
+        if (!r || !r.parent) {
+            this._aceFullscreenRestore = null;
+            return;
+        }
+        var dom = this.el.dom;
+        if (r.next && r.next.parentNode === r.parent) {
+            r.parent.insertBefore(dom, r.next);
+        } else {
+            r.parent.appendChild(dom);
+        }
+        this._aceFullscreenRestore = null;
+    },
+
+    syncAceOwnerLayout : function() {
+        var oc = this.ownerCt;
+        if (oc && typeof oc.doLayout === 'function') {
+            oc.doLayout.defer(1, oc);
+        }
+    },
+
+    onDestroy : function() {
+        if (this.isFullscreen) {
+            this.el.removeClass('ace_maximized');
+            this.restoreAceFromFullscreenBody();
+            this.isFullscreen = false;
+        }
+        MODx.ux.Ace.superclass.onDestroy.call(this);
     },
 
     updatewrapmode : function() {
