@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fullscreen Ace over the whole manager (MODX 3): right-hand panels and other chrome no longer stay on top. The editor node is moved to `document.body` while maximized and uses a higher `z-index`, fixing stacking limits inside `#modx-content` that core PR [modxcms/revolution#16778](https://github.com/modxcms/revolution/pull/16778) does not address for extras ([#18](https://github.com/modx-pro/modx-ace/issues/18)).
+- Fullscreen `.ace_maximized` insets (`top: 60px`, `left: 70px`, `right/bottom: 3px`) so the manager top bar, left tree, and resource/form header stay visible on MODX 3.1+ (see [community report](https://community.modx.com/t/3-1-0-issue-with-ace-editor-fullscreen/8267) and [workaround note](https://community.modx.com/t/3-1-0-issue-with-ace-editor-fullscreen/8267/5)).
 - In-editor PHP syntax check: false `Syntax error, unexpected '?'` (and similar) for valid PHP 7+ code such as null coalescing `??`. Bundled `worker-php.js` updated to [ace-builds](https://www.npmjs.com/package/ace-builds) **1.37.5** (`T_COALESCE` and related tokens).
 
 ## [1.9.8] - 2026-03-05
