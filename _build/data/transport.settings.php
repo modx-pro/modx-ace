@@ -118,4 +118,13 @@ $settings['draft_restore']->fromArray(array(
         'area' => 'general'
     ),'',true,true);
 
+$settings['color_preview']= $modx->newObject('modSystemSetting');
+$settings['color_preview']->fromArray(array(
+        'key' => 'ace.color_preview',
+        'xtype' => 'combo-boolean',
+        'value' => '0',
+        'namespace' => 'ace',
+        'area' => 'general'
+    ),'',true,true);
+
 return $settings;
