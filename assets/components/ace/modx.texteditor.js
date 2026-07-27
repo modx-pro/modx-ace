@@ -186,6 +186,9 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
     },
 
     getValue : function (){
+        if (this.editor) {
+            this.valueHolder.value = this.editor.getSession().getValue();
+        }
         return this.valueHolder.value;
     },
 
@@ -426,6 +429,16 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
             parent: dom.parentNode,
             next: dom.nextSibling
         };
+        // Keep the named hidden input inside the form while the editor UI is on body.
+        // MODX Ctrl+S collects field values from the form DOM; reparenting would submit stale content (#25).
+        if (this.valueHolder && this.valueHolder.parentNode === dom) {
+            dom.removeChild(this.valueHolder);
+            if (this._aceFullscreenRestore.next && this._aceFullscreenRestore.next.parentNode === this._aceFullscreenRestore.parent) {
+                this._aceFullscreenRestore.parent.insertBefore(this.valueHolder, this._aceFullscreenRestore.next);
+            } else {
+                this._aceFullscreenRestore.parent.appendChild(this.valueHolder);
+            }
+        }
         document.body.appendChild(dom);
     },
 
@@ -436,6 +449,9 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
             return;
         }
         var dom = this.el.dom;
+        if (this.valueHolder && this.valueHolder.parentNode !== dom) {
+            dom.appendChild(this.valueHolder);
+        }
         if (r.next && r.next.parentNode === r.parent) {
             r.parent.insertBefore(dom, r.next);
         } else {
@@ -585,8 +601,23 @@ MODx.ux.Ace.replaceComponent = function(id, mimeType, modxTags) {
     textArea.el.dom.removeAttribute('name');
     textArea.el.setStyle('display', 'none');
     textEditor.render(textArea.el.dom.parentNode);
+    textArea.aceEditor = textEditor;
+    textArea.getValue = function() {
+        return textEditor.getValue();
+    };
+    textArea.setValue = function(value) {
+        textEditor.setValue(value);
+        return textArea;
+    };
     textArea.setSize = function(){textEditor.setSize.apply(textEditor, arguments)};
     textEditor.editor.on('change', function(e){textArea.fireEvent('change', e);});
+    if (!MODx.onSaveEditor) {
+        MODx.onSaveEditor = function(fld) {
+            if (fld && fld.aceEditor) {
+                fld.setValue(fld.aceEditor.getValue());
+            }
+        };
+    }
     textArea.on('destroy', function() {textEditor.destroy();});
     if (!modxTags)
         return;
