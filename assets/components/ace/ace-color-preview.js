@@ -12,28 +12,84 @@ MODx.ux.Ace.supportsColorPreview = function(mimeType) {
     return /css|scss|less|html|smarty|twig|svg/i.test(mimeType);
 };
 
+/**
+ * Per-editor color preview instances (not a shared singleton).
+ * Avoids marker/state collisions when multiple Ace fields are on one page.
+ */
 MODx.ux.Ace.ColorPreview = {
-    markerClassPrefix: 'ace-modx-color-marker-',
-    markerStyleEl: null,
-    markerSeq: 0,
+    _instances: {},
+    _seq: 0,
+    MAX_SCAN_LINES: 2000,
 
     init: function(editor, mimeType) {
         if (!MODx.ux.Ace.isColorPreviewEnabled() || !MODx.ux.Ace.supportsColorPreview(mimeType)) {
-            return;
+            return null;
+        }
+        if (!editor) {
+            return null;
         }
 
-        this.markerIds = [];
-        this.markerSeq = 0;
-        this.editor = editor;
-        var session = editor.getSession();
-        var refresh = this.debounce(this.refresh.bind(this), 150);
-        session.on('change', refresh);
+        var id = editor.id || ('ace-color-' + (++this._seq));
+        if (!editor.id) {
+            editor.id = id;
+        }
+        this.destroy(editor);
+
+        var instance = {
+            editor: editor,
+            markerIds: [],
+            markerSeq: 0,
+            styleEl: null
+        };
+
+        instance.styleEl = document.createElement('style');
+        instance.styleEl.id = 'ace-modx-color-preview-' + id;
+        document.head.appendChild(instance.styleEl);
+
+        var refresh = this.debounce(function() {
+            MODx.ux.Ace.ColorPreview.refresh(instance);
+        }, 150);
+
+        instance._onChange = refresh;
+        editor.getSession().on('change', refresh);
         editor.on('changeMode', refresh);
-        this.refresh();
+        editor.on('changeSession', refresh);
+
+        this._instances[id] = instance;
+        this.refresh(instance);
+        return instance;
     },
 
-    refresh: function() {
-        var editor = this.editor;
+    destroy: function(editor) {
+        if (!editor) {
+            return;
+        }
+        var id = editor.id;
+        var instance = id ? this._instances[id] : null;
+        if (!instance) {
+            return;
+        }
+        var session = instance.editor.getSession();
+        instance.markerIds.forEach(function(markerId) {
+            session.removeMarker(markerId);
+        });
+        if (instance.styleEl && instance.styleEl.parentNode) {
+            instance.styleEl.parentNode.removeChild(instance.styleEl);
+        }
+        if (instance._onChange) {
+            try {
+                session.removeListener('change', instance._onChange);
+            } catch (e) {}
+            try {
+                instance.editor.removeListener('changeMode', instance._onChange);
+                instance.editor.removeListener('changeSession', instance._onChange);
+            } catch (e2) {}
+        }
+        delete this._instances[id];
+    },
+
+    refresh: function(instance) {
+        var editor = instance.editor;
         if (!editor) {
             return;
         }
@@ -42,22 +98,17 @@ MODx.ux.Ace.ColorPreview = {
         var Range = ace.require('ace/range').Range;
         var self = this;
 
-        this.markerIds.forEach(function(id) {
-            session.removeMarker(id);
+        instance.markerIds.forEach(function(markerId) {
+            session.removeMarker(markerId);
         });
-        this.markerIds = [];
+        instance.markerIds = [];
 
-        if (!this.markerStyleEl) {
-            this.markerStyleEl = document.createElement('style');
-            this.markerStyleEl.id = 'ace-modx-color-preview-styles';
-            document.head.appendChild(this.markerStyleEl);
-        }
-
-        var rules = [];
         var lines = session.doc.getAllLines();
-        var regex = /#([0-9a-fA-F]{3,8})\b|rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+(?:\s*,\s*[\d.]+)?\s*\)|hsla?\(\s*[\d.]+\s*,\s*[\d.]+%?\s*,\s*[\d.]+%?(?:\s*,\s*[\d.]+)?\s*\)/g;
+        var end = Math.min(lines.length, this.MAX_SCAN_LINES);
+        var rules = [];
+        var regex = /#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b|rgba?\(\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)|hsla?\(\s*-?\d+(?:\.\d+)?\s*,\s*\d+(?:\.\d+)?%\s*,\s*\d+(?:\.\d+)?%(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)/g;
 
-        for (var row = 0; row < lines.length; row++) {
+        for (var row = 0; row < end; row++) {
             var line = lines[row];
             var match;
             regex.lastIndex = 0;
@@ -66,19 +117,20 @@ MODx.ux.Ace.ColorPreview = {
                 if (!color) {
                     continue;
                 }
-                var className = self.markerClassPrefix + (self.markerSeq++);
-                rules.push('.' + className + ' { background-color: ' + color + ' !important; opacity: 0.35; border-radius: 2px; }');
-                var markerId = session.addMarker(
+                var className = 'ace-modx-color-marker-' + (instance.markerSeq++);
+                rules.push('.' + className + '{background-color:' + color + ' !important;opacity:0.35;border-radius:2px;}');
+                instance.markerIds.push(session.addMarker(
                     new Range(row, match.index, row, match.index + match[0].length),
                     className,
                     'text',
                     false
-                );
-                self.markerIds.push(markerId);
+                ));
             }
         }
 
-        this.markerStyleEl.textContent = rules.join('\n');
+        if (instance.styleEl) {
+            instance.styleEl.textContent = rules.join('\n');
+        }
     },
 
     normalizeColor: function(value) {

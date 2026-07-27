@@ -39,6 +39,9 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
 
     initEvents : function(){
         Ext.ux.Ace.superclass.initEvents.call(this);
+        if (!this.editor) {
+            return;
+        }
         this.editor.on('focus', this.onFocus.bind(this));
         this.editor.on('blur', this.onBlur.bind(this));
     },
@@ -112,6 +115,9 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
     },
 
     onDestroy : function(){
+        if (MODx.ux.Ace.ColorPreview && this.editor) {
+            MODx.ux.Ace.ColorPreview.destroy(this.editor);
+        }
         if (this.editor) {
             this.editor.destroy();
             this.editor = null;
@@ -128,7 +134,9 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
     },
 
     onResize : function(){
-        this.editor.resize(true);
+        if (this.editor) {
+            this.editor.resize(true);
+        }
     },
 
     doAutoSize : function(e){
@@ -136,6 +144,9 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
     },
 
     autoSize: function(){
+        if (!this.editor) {
+            return;
+        }
         var linesCount = this.editor.getSession().getScreenLength();
         var lineHeight = this.editor.renderer.lineHeight;
         var scrollBar =  this.editor.renderer.scrollBar.getWidth();
@@ -185,7 +196,9 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
 
     setSize : function(width, height){
         Ext.ux.Ace.superclass.setSize.apply(this, arguments);
-        this.editor.resize(true);
+        if (this.editor) {
+            this.editor.resize(true);
+        }
     },
 
     getValue : function (){
@@ -256,141 +269,6 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
 Ext.reg('ace', Ext.ux.Ace);
 
 Ext.namespace('MODx.ux');
-
-MODx.ux.Ace.isAutoCloseTagsEnabled = function() {
-    var value = MODx.config['ace.auto_close_tags'];
-    if (value === undefined || value === null || value === '') {
-        return true;
-    }
-    return value == true || value === '1' || value === 1;
-};
-
-MODx.ux.Ace.isDraftRestoreEnabled = function() {
-    var value = MODx.config['ace.draft_restore'];
-    return value == true || value === '1' || value === 1;
-};
-
-MODx.ux.Ace.DraftManager = {
-    TTL_MS: 7 * 24 * 60 * 60 * 1000,
-    debounceMs: 500,
-
-    getStorageKey: function(field) {
-        var action = (MODx.request && MODx.request.a) ? MODx.request.a : 'manager';
-        var id = (MODx.request && MODx.request.id) ? MODx.request.id : '0';
-        var name = field.name || field.id || 'field';
-        return 'ace:draft:' + action + ':' + name + ':' + id;
-    },
-
-    readDraft: function(key) {
-        try {
-            var raw = localStorage.getItem(key);
-            if (!raw) {
-                return null;
-            }
-            var data = JSON.parse(raw);
-            if (!data || typeof data.value !== 'string') {
-                return null;
-            }
-            if (data.ts && (Date.now() - data.ts) > this.TTL_MS) {
-                localStorage.removeItem(key);
-                return null;
-            }
-            return data;
-        } catch (e) {
-            return null;
-        }
-    },
-
-    writeDraft: function(key, value) {
-        try {
-            localStorage.setItem(key, JSON.stringify({value: value, ts: Date.now()}));
-        } catch (e) {}
-    },
-
-    clearDraft: function(key) {
-        try {
-            localStorage.removeItem(key);
-        } catch (e) {}
-    },
-
-    bind: function(field, textEditor) {
-        if (!MODx.ux.Ace.isDraftRestoreEnabled() || field.readOnly === true) {
-            return;
-        }
-
-        var self = this;
-        var key = this.getStorageKey(field);
-        var initialValue = textEditor.getValue();
-        var draft = this.readDraft(key);
-
-        if (draft && draft.value !== initialValue) {
-            this.showRestoreBanner(textEditor, key, draft.value);
-        }
-
-        var saveTimer = null;
-        textEditor.editor.getSession().on('change', function() {
-            if (saveTimer) {
-                clearTimeout(saveTimer);
-            }
-            saveTimer = setTimeout(function() {
-                self.writeDraft(key, textEditor.getValue());
-            }, self.debounceMs);
-        });
-
-        var panel = field.findParentBy ? field.findParentBy(function(c) {
-            return c && c.getForm && c.getForm();
-        }) : null;
-        if (panel) {
-            panel.on('success', function() {
-                self.clearDraft(key);
-            });
-            var form = panel.getForm();
-            if (form) {
-                form.on('actioncomplete', function(f, action) {
-                    if (action && action.result && action.result.success) {
-                        self.clearDraft(key);
-                    }
-                });
-            }
-        }
-    },
-
-    showRestoreBanner: function(textEditor, key, draftValue) {
-        var banner = document.createElement('div');
-        banner.className = 'ace-draft-restore-banner';
-        banner.style.cssText = 'padding:6px 10px;background:#fff3cd;border:1px solid #ffc107;margin-bottom:4px;font-size:12px;';
-        banner.appendChild(document.createTextNode(_('ui_ace.draft_restore_prompt') + ' '));
-
-        var restoreLink = document.createElement('a');
-        restoreLink.href = '#';
-        restoreLink.className = 'ace-draft-restore-yes';
-        restoreLink.appendChild(document.createTextNode(_('ui_ace.draft_restore_yes')));
-        restoreLink.onclick = function(e) {
-            e.preventDefault();
-            textEditor.setValue(draftValue);
-            if (banner.parentNode) {
-                banner.parentNode.removeChild(banner);
-            }
-        };
-
-        var discardLink = document.createElement('a');
-        discardLink.href = '#';
-        discardLink.className = 'ace-draft-restore-no';
-        discardLink.appendChild(document.createTextNode(_('ui_ace.draft_restore_discard')));
-        discardLink.onclick = function(e) {
-            e.preventDefault();
-            MODx.ux.Ace.DraftManager.clearDraft(key);
-            if (banner.parentNode) {
-                banner.parentNode.removeChild(banner);
-            }
-        };
-
-        banner.appendChild(restoreLink);
-        banner.appendChild(document.createTextNode(' | '));
-        banner.appendChild(discardLink);
-        textEditor.el.dom.parentNode.insertBefore(banner, textEditor.el.dom);
-    }
-};
 
 MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
 
@@ -720,6 +598,180 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
     }
 });
 
+MODx.ux.Ace.isAutoCloseTagsEnabled = function() {
+    var value = MODx.config['ace.auto_close_tags'];
+    if (value === undefined || value === null || value === '') {
+        return true;
+    }
+    return value == true || value === '1' || value === 1;
+};
+
+MODx.ux.Ace.isDraftRestoreEnabled = function() {
+    var value = MODx.config['ace.draft_restore'];
+    return value == true || value === '1' || value === 1;
+};
+
+MODx.ux.Ace.DraftManager = {
+    TTL_MS: 7 * 24 * 60 * 60 * 1000,
+    debounceMs: 500,
+    _boundKeys: {},
+
+    getStorageKey: function(field) {
+        var action = (MODx.request && MODx.request.a) ? String(MODx.request.a) : 'manager';
+        var id = (MODx.request && MODx.request.id) ? String(MODx.request.id) : 'new';
+        var name = field.name || field.id || 'field';
+        if (!field.name && field.id) {
+            name = field.id;
+        }
+        return 'ace:draft:' + encodeURIComponent(action) + ':' + encodeURIComponent(name) + ':' + encodeURIComponent(id);
+    },
+
+    findFormPanel: function(field) {
+        if (field && field.findParentBy) {
+            return field.findParentBy(function(c) {
+                return c && c.getForm && c.getForm();
+            });
+        }
+        return Ext.getCmp('modx-panel-resource')
+            || Ext.getCmp('modx-panel-chunk')
+            || Ext.getCmp('modx-panel-template')
+            || Ext.getCmp('modx-panel-snippet')
+            || Ext.getCmp('modx-panel-plugin')
+            || Ext.getCmp('modx-panel-file')
+            || null;
+    },
+
+    readDraft: function(key) {
+        try {
+            var raw = localStorage.getItem(key);
+            if (!raw) {
+                return null;
+            }
+            var data = JSON.parse(raw);
+            if (!data || typeof data.value !== 'string') {
+                return null;
+            }
+            if (data.ts && (Date.now() - data.ts) > this.TTL_MS) {
+                localStorage.removeItem(key);
+                return null;
+            }
+            return data;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    writeDraft: function(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify({value: value, ts: Date.now()}));
+        } catch (e) {}
+    },
+
+    clearDraft: function(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (e) {}
+        delete this._boundKeys[key];
+    },
+
+    bindClearOnSave: function(key, field, textEditor) {
+        var self = this;
+        var clear = function() {
+            self.clearDraft(key);
+        };
+
+        if (textEditor) {
+            textEditor.aceDraftKey = key;
+        }
+
+        var panel = this.findFormPanel(field);
+        if (!panel) {
+            return;
+        }
+        panel.on('success', clear);
+        var form = panel.getForm && panel.getForm();
+        if (form) {
+            form.on('actioncomplete', function(f, action) {
+                if (action && action.result && action.result.success) {
+                    clear();
+                }
+            });
+        }
+    },
+
+    bind: function(field, textEditor) {
+        if (!MODx.ux.Ace.isDraftRestoreEnabled() || field.readOnly === true) {
+            return;
+        }
+        if (!textEditor || !textEditor.editor) {
+            return;
+        }
+
+        var self = this;
+        var key = this.getStorageKey(field);
+        if (this._boundKeys[key]) {
+            return;
+        }
+        this._boundKeys[key] = true;
+
+        var initialValue = textEditor.getValue();
+        var draft = this.readDraft(key);
+
+        // Offer restore only when draft differs and is non-empty (avoid noise for intentional clear).
+        if (draft && draft.value !== '' && draft.value !== initialValue) {
+            this.showRestoreBanner(textEditor, key, draft.value);
+        }
+
+        var saveTimer = null;
+        textEditor.editor.getSession().on('change', function() {
+            if (saveTimer) {
+                clearTimeout(saveTimer);
+            }
+            saveTimer = setTimeout(function() {
+                self.writeDraft(key, textEditor.getValue());
+            }, self.debounceMs);
+        });
+
+        this.bindClearOnSave(key, field, textEditor);
+    },
+
+    showRestoreBanner: function(textEditor, key, draftValue) {
+        var banner = document.createElement('div');
+        banner.className = 'ace-draft-restore-banner';
+        banner.style.cssText = 'padding:6px 10px;background:#fff3cd;border:1px solid #ffc107;margin-bottom:4px;font-size:12px;';
+        banner.appendChild(document.createTextNode(_('ui_ace.draft_restore_prompt') + ' '));
+
+        var restoreLink = document.createElement('a');
+        restoreLink.href = '#';
+        restoreLink.className = 'ace-draft-restore-yes';
+        restoreLink.appendChild(document.createTextNode(_('ui_ace.draft_restore_yes')));
+        restoreLink.onclick = function(e) {
+            e.preventDefault();
+            textEditor.setValue(draftValue);
+            if (banner.parentNode) {
+                banner.parentNode.removeChild(banner);
+            }
+        };
+
+        var discardLink = document.createElement('a');
+        discardLink.href = '#';
+        discardLink.className = 'ace-draft-restore-no';
+        discardLink.appendChild(document.createTextNode(_('ui_ace.draft_restore_discard')));
+        discardLink.onclick = function(e) {
+            e.preventDefault();
+            MODx.ux.Ace.DraftManager.clearDraft(key);
+            if (banner.parentNode) {
+                banner.parentNode.removeChild(banner);
+            }
+        };
+
+        banner.appendChild(restoreLink);
+        banner.appendChild(document.createTextNode(' | '));
+        banner.appendChild(discardLink);
+        textEditor.el.dom.parentNode.insertBefore(banner, textEditor.el.dom);
+    }
+};
+
 MODx.ux.Ace.replaceComponent = function(id, mimeType, modxTags, options) {
     options = options || {};
     var textArea = Ext.getCmp(id);
@@ -731,29 +783,39 @@ MODx.ux.Ace.replaceComponent = function(id, mimeType, modxTags, options) {
             }
         }, 50);
     }
-    if (textArea.aceEditor) {
+    if (textArea.aceEditor || textArea._aceReplacePending) {
         return;
     }
 
-    var value = textArea.getValue();
-    if (!value && options.waitForValue !== false) {
-        var panel = Ext.getCmp('modx-panel-resource-data');
-        if (panel) {
-            var replaceWhenReady = function() {
-                MODx.ux.Ace.replaceComponent(id, mimeType, modxTags, {waitForValue: false});
-            };
-            panel.on('ready', replaceWhenReady, null, {single: true});
-            var pagetitleField = panel.getForm ? panel.getForm().findField('pagetitle') : null;
-            if (pagetitleField && pagetitleField.getValue()) {
-                replaceWhenReady();
+    // Async cache buffer on resource overview only (#28). Do not delay empty new chunks/files.
+    if (id === 'modx-rdata-buffer' && options.waitForValue !== false) {
+        var value = textArea.getValue();
+        if (!value) {
+            var panel = Ext.getCmp('modx-panel-resource-data');
+            if (panel) {
+                textArea._aceReplacePending = true;
+                var replaceWhenReady = function() {
+                    textArea._aceReplacePending = false;
+                    if (textArea.aceEditor) {
+                        return;
+                    }
+                    MODx.ux.Ace.replaceComponent(id, mimeType, modxTags, {waitForValue: false});
+                };
+                if (panel.rendered && panel.getForm) {
+                    var pagetitleField = panel.getForm().findField('pagetitle');
+                    if (pagetitleField && pagetitleField.getValue()) {
+                        return replaceWhenReady();
+                    }
+                }
+                panel.on('ready', replaceWhenReady, null, {single: true});
+                return;
             }
-            return;
-        }
-        var attempts = options._attempts || 0;
-        if (attempts < 50) {
-            return setTimeout(function() {
-                MODx.ux.Ace.replaceComponent(id, mimeType, modxTags, Ext.applyIf({_attempts: attempts + 1}, options));
-            }, 100);
+            var attempts = options._attempts || 0;
+            if (attempts < 50) {
+                return setTimeout(function() {
+                    MODx.ux.Ace.replaceComponent(id, mimeType, modxTags, Ext.applyIf({_attempts: attempts + 1}, options));
+                }, 100);
+            }
         }
     }
 
@@ -773,6 +835,7 @@ MODx.ux.Ace.replaceComponent = function(id, mimeType, modxTags, options) {
     textArea.el.setStyle('display', 'none');
     textEditor.render(textArea.el.dom.parentNode);
     textArea.aceEditor = textEditor;
+    textArea._aceReplacePending = false;
     textArea.getValue = function() {
         return textEditor.getValue();
     };
@@ -786,6 +849,9 @@ MODx.ux.Ace.replaceComponent = function(id, mimeType, modxTags, options) {
         MODx.onSaveEditor = function(fld) {
             if (fld && fld.aceEditor) {
                 fld.setValue(fld.aceEditor.getValue());
+                if (fld.aceEditor.aceDraftKey) {
+                    MODx.ux.Ace.DraftManager.clearDraft(fld.aceEditor.aceDraftKey);
+                }
             }
         };
     }
@@ -809,11 +875,13 @@ MODx.ux.Ace.replaceComponent = function(id, mimeType, modxTags, options) {
 
 MODx.ux.Ace.replaceTextAreas = function(textAreas, mimeType) {
     textAreas.forEach(function(textArea){
+        var fieldName = textArea.name;
+        var fieldId = textArea.id;
         var editor = MODx.load({
             xtype: 'modx-texteditor',
             width: 'auto',
             height: parseInt(textArea.style.height) || 200,
-            name: textArea.name,
+            name: fieldName,
             value: textArea.value,
             mimeType: mimeType || 'text/html',
             modxTags: true
@@ -824,7 +892,7 @@ MODx.ux.Ace.replaceTextAreas = function(textAreas, mimeType) {
 
         editor.render(textArea.parentNode);
         editor.editor.on('change', function(e){ MODx.fireResourceFormChange() });
-        MODx.ux.Ace.DraftManager.bind({name: textArea.name, id: textArea.id, readOnly: textArea.readOnly}, editor);
+        MODx.ux.Ace.DraftManager.bind({name: fieldName, id: fieldId, readOnly: textArea.readOnly}, editor);
     });
 };
 
@@ -836,12 +904,14 @@ MODx.ux.Ace.replaceTextArea = function(id, config) {
         return undefined;
     }
     var textArea=textAreaElement.dom;
+    var fieldName = textArea.name;
+    var fieldId = textArea.id;
 
     Ext.applyIf(config,{
         xtype: 'modx-texteditor',
         width: 'auto',
         height: parseInt(textArea.style.height) || 200,
-        name: textArea.name,
+        name: fieldName,
         value: textArea.value,
         mimeType: 'text/html',
         modxTags: true
@@ -854,7 +924,7 @@ MODx.ux.Ace.replaceTextArea = function(id, config) {
 
     editor.render(textArea.parentNode);
     editor.editor.on('change', function(e){ MODx.fireResourceFormChange() });
-    MODx.ux.Ace.DraftManager.bind({name: textArea.name, id: textArea.id, readOnly: textArea.readOnly}, editor);
+    MODx.ux.Ace.DraftManager.bind({name: fieldName, id: fieldId, readOnly: textArea.readOnly}, editor);
     new IntersectionObserver(function(){
         editor.editor.resize(true);
         var tabs = Ext.get('modx-tv-tabs');
