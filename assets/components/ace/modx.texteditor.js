@@ -112,7 +112,10 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
     },
 
     onDestroy : function(){
-        this.editor.destroy();
+        if (this.editor) {
+            this.editor.destroy();
+            this.editor = null;
+        }
         Ext.ux.Ace.superclass.onDestroy.call(this);
     },
 
@@ -468,7 +471,7 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
     },
 
     onDestroy : function() {
-        if (this.isFullscreen) {
+        if (this.isFullscreen && this.el) {
             this.el.removeClass('ace_maximized');
             this.restoreAceFromFullscreenBody();
             this.isFullscreen = false;
