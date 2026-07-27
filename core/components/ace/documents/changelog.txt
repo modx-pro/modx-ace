@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `onDestroy` no longer throws when Ace was never initialized (destroy before `onRender` or partial Ext component) ([#32](https://github.com/modx-pro/modx-ace/issues/32)).
 - SCSS/CSS/static chunks: MODX tag mixed mode is enabled only for HTML-like mime types (`text/html`, Smarty, Twig), so `//` and `/* */` comments highlight correctly instead of HTML `<!-- -->` ([#31](https://github.com/modx-pro/modx-ace/issues/31)).
 - Resource overview cache tab (`resource/data`): Ace initializes after cache buffer is loaded, so `modx-rdata-buffer` is not empty ([#28](https://github.com/modx-pro/modx-ace/issues/28)).
+- Empty-field Ace init no longer waits up to 5s: async wait applies only to `modx-rdata-buffer` on the resource overview cache tab.
+- `which_editor` for resource forms also respects context overrides (aligned with `use_editor`).
+- Color preview is per-editor (no shared singleton), capped at 2000 lines, and cleaned up on destroy.
+- Draft restore: stable storage keys, non-empty draft banner only, clear on successful form save / `MODx.onSaveEditor`.
+- Guard `onResize` / `initEvents` / `autoSize` / `setSize` when Ace was never rendered.
+- Static Ace helpers (`DraftManager`, settings getters) attach after `Ext.extend` so they are not overwritten; `ace-color-preview.js` loads after `modx.texteditor.js`.
 
 ## [1.9.9] - 2026-03-29
 

@@ -35,9 +35,18 @@ if (!function_exists('aceGetEffectiveUseEditor')) {
     }
 }
 
+if (!function_exists('aceGetEffectiveWhichEditor')) {
+    function aceGetEffectiveWhichEditor($modx) {
+        if ($modx->controller && !empty($modx->controller->context)) {
+            return trim((string) $modx->controller->context->getOption('which_editor', $modx->getOption('which_editor', '')));
+        }
+        return trim((string) $modx->getOption('which_editor', ''));
+    }
+}
+
 if (!function_exists('aceIsNonAceRichTextEditor')) {
     function aceIsNonAceRichTextEditor($modx) {
-        $whichEditor = trim((string) $modx->getOption('which_editor', ''));
+        $whichEditor = aceGetEffectiveWhichEditor($modx);
         return $whichEditor !== '' && strcasecmp($whichEditor, 'Ace') !== 0;
     }
 }
