@@ -589,16 +589,43 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
     }
 });
 
-MODx.ux.Ace.replaceComponent = function(id, mimeType, modxTags) {
+MODx.ux.Ace.replaceComponent = function(id, mimeType, modxTags, options) {
+    options = options || {};
     var textArea = Ext.getCmp(id);
     if (!textArea) {
         // Workaround for File Update panel (fix issue, caused by wrong event order)
         return setTimeout(function() {
-            var textArea = Ext.getCmp(id);
-            if (textArea)
-                MODx.ux.Ace.replaceComponent(id, mimeType, modxTags);
-        });
+            if (Ext.getCmp(id)) {
+                MODx.ux.Ace.replaceComponent(id, mimeType, modxTags, options);
+            }
+        }, 50);
     }
+    if (textArea.aceEditor) {
+        return;
+    }
+
+    var value = textArea.getValue();
+    if (!value && options.waitForValue !== false) {
+        var panel = Ext.getCmp('modx-panel-resource-data');
+        if (panel) {
+            var replaceWhenReady = function() {
+                MODx.ux.Ace.replaceComponent(id, mimeType, modxTags, {waitForValue: false});
+            };
+            panel.on('ready', replaceWhenReady, null, {single: true});
+            var pagetitleField = panel.getForm ? panel.getForm().findField('pagetitle') : null;
+            if (pagetitleField && pagetitleField.getValue()) {
+                replaceWhenReady();
+            }
+            return;
+        }
+        var attempts = options._attempts || 0;
+        if (attempts < 50) {
+            return setTimeout(function() {
+                MODx.ux.Ace.replaceComponent(id, mimeType, modxTags, Ext.applyIf({_attempts: attempts + 1}, options));
+            }, 100);
+        }
+    }
+
     var textEditor = MODx.load({
         xtype: 'modx-texteditor',
         enableKeyEvents: true,
