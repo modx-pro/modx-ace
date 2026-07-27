@@ -42,6 +42,16 @@ class Ace {
             $this->modx->controller->addJavascript($this->config['assetsUrl'] . 'ace/ext-keybinding_menu.js');
             $this->modx->controller->addJavascript($this->config['assetsUrl'] . 'ace/ext-emmet.js');
             $this->modx->controller->addJavascript($this->config['assetsUrl'] . 'modx.texteditor.js');
+
+            if (trim((string) $this->modx->getOption('ace.snippets', null, '')) === '') {
+                $defaultSnippetsFile = $this->modx->getOption('assets_path') . 'components/ace/snippets/modx.default.snippets';
+                if (is_readable($defaultSnippetsFile)) {
+                    $defaultSnippets = file_get_contents($defaultSnippetsFile);
+                    $this->modx->controller->addHtml(
+                        '<script>MODx.config["ace.snippets"] = ' . json_encode($defaultSnippets, JSON_INVALID_UTF8_SUBSTITUTE) . ';</script>'
+                    );
+                }
+            }
         }
         $this->assetsLoaded = true;
     }

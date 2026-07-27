@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.10] - 2026-07-27
 
 ### Added
+- Default MODX Tab snippets (`getr`, `pdoResources`, `chunk`, `[[*tv]]`, etc.) installed into `ace.snippets` on fresh install/upgrade when the setting is empty ([#36](https://github.com/modx-pro/modx-ace/issues/36)).
 - System setting `ace.auto_close_tags` to disable automatic closing of HTML tags, brackets, and MODX tag pairs ([#29](https://github.com/modx-pro/modx-ace/issues/29)).
 
 ### Fixed
