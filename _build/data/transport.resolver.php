@@ -45,6 +45,17 @@ if ($pluginid = $object->get('id')) {
                 $newEvent->save();
                 $log('✓ Added missing system event: OnFileEditFormPrerender');
             }
+
+            $snippetsSetting = $object->xpdo->getObject('modSystemSetting', ['key' => 'ace.snippets']);
+            if ($snippetsSetting && trim((string) $snippetsSetting->get('value')) === '') {
+                $snippetsFile = $object->xpdo->getOption('assets_path') . 'components/ace/snippets/modx.default.snippets';
+                if (is_readable($snippetsFile)) {
+                    $snippetsSetting->set('value', file_get_contents($snippetsFile));
+                    $snippetsSetting->save();
+                    $log('✓ Installed default MODX Tab snippets (ace.snippets)');
+                }
+            }
+
             $log('[Ace] Default editor and events configured.');
             break;
 
