@@ -26,6 +26,22 @@ $corePath = $modx->getOption('ace.core_path', null, $modx->getOption('core_path'
 $ace = $modx->getService('ace', 'Ace', $corePath . 'model/ace/');
 $ace->initialize();
 
+if (!function_exists('aceGetEffectiveUseEditor')) {
+    function aceGetEffectiveUseEditor($modx) {
+        if ($modx->controller && !empty($modx->controller->context)) {
+            return (bool) $modx->controller->context->getOption('use_editor', $modx->getOption('use_editor'));
+        }
+        return (bool) $modx->getOption('use_editor');
+    }
+}
+
+if (!function_exists('aceIsNonAceRichTextEditor')) {
+    function aceIsNonAceRichTextEditor($modx) {
+        $whichEditor = trim((string) $modx->getOption('which_editor', ''));
+        return $whichEditor !== '' && strcasecmp($whichEditor, 'Ace') !== 0;
+    }
+}
+
 $extensionMap = array(
     'tpl'   => 'text/x-smarty',
     'htm'   => 'text/html',
@@ -63,6 +79,7 @@ if (!$html_elements_mime) {
 
 // Defines wether we should highlight modx tags
 $modxTags = false;
+$useEditor = null;
 switch ($modx->event->name) {
     case 'OnSnipFormPrerender':
         $field = 'modx-snippet-snippet';
@@ -103,9 +120,12 @@ switch ($modx->event->name) {
         $modxTags = $extension == 'tpl';
         break;
     case 'OnDocFormPrerender':
+        // Resource content: respect per-context use_editor (#35) and which_editor (#30).
+        // When another RTE is configured, do not replace #ta — MODX.loadRTE or plain textarea handles it.
         if (!$modx->controller || empty($modx->controller->resourceArray)) {
             return;
         }
+        $useEditor = aceGetEffectiveUseEditor($modx);
         $field = 'ta';
         $mimeType = $modx->getObject('modContentType', $modx->controller->resourceArray['content_type'])->get('mime_type');
 
@@ -113,10 +133,12 @@ switch ($modx->event->name) {
             $mimeType = $html_elements_mime;
         }
 
-        if ($modx->getOption('use_editor')) {
+        if ($useEditor) {
             $richText = $modx->controller->resourceArray['richtext'];
             $classKey = $modx->controller->resourceArray['class_key'];
             if ($richText || in_array($classKey, array('modStaticResource', 'modSymLink', 'modWebLink', 'modXMLRPCResource'))) {
+                $field = false;
+            } elseif (aceIsNonAceRichTextEditor($modx)) {
                 $field = false;
             }
         }
@@ -135,7 +157,7 @@ if (!empty($field)) {
     $script .= "MODx.ux.Ace.replaceComponent('$field', '$mimeType', $modxTags);";
 }
 
-if ($modx->event->name == 'OnDocFormPrerender' && !$modx->getOption('use_editor')) {
+if ($modx->event->name == 'OnDocFormPrerender' && $useEditor === false) {
     $script .= "MODx.ux.Ace.replaceTextAreas(Ext.query('.modx-richtext'));";
 }
 

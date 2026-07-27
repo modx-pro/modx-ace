@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.11] - 2026-07-27
+
+### Fixed
+- Resource content form: Ace no longer replaces `#ta` when another RTE is configured (`which_editor` ≠ Ace). With `use_editor=Yes` and e.g. TinyMCE, non-richtext resources keep a plain textarea instead of Ace ([#30](https://github.com/modx-pro/modx-ace/issues/30)).
+- Resource content form: `use_editor` is read from the current context override when available, not only the global system setting ([#35](https://github.com/modx-pro/modx-ace/issues/35)).
+
 ## [1.9.10] - 2026-07-07
 - Ctrl+S / Cmd+S in fullscreen on chunk/template/element forms: save showed success but wrote stale content because the hidden field left the form when the editor moved to `document.body`. The named input now stays in the form; `getValue()` syncs from Ace before submit; `MODx.onSaveEditor` syncs the original Ext field ([#25](https://github.com/modx-pro/modx-ace/issues/25)).
 
