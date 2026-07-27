@@ -34,3 +34,5 @@ $_lang['setting_ace.auto_close_tags'] = 'Автозакрытие тегов и 
 $_lang['setting_ace.auto_close_tags_desc'] = 'Автоматически вставлять закрывающие скобки, кавычки и HTML/MODX-теги при вводе.';
 $_lang['setting_ace.draft_restore'] = 'Восстановление черновиков';
 $_lang['setting_ace.draft_restore_desc'] = 'Сохранять текст редактора в localStorage и предлагать восстановление после случайной перезагрузки (срок хранения 7 дней).';
+$_lang['setting_ace.color_preview'] = 'Предпросмотр CSS-цветов';
+$_lang['setting_ace.color_preview_desc'] = 'Подсвечивать литералы #hex, rgb() и hsl() полупрозрачным фоном в CSS/HTML-режимах.';

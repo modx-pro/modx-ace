@@ -34,3 +34,5 @@ $_lang['setting_ace.auto_close_tags'] = 'Auto-close tags and brackets';
 $_lang['setting_ace.auto_close_tags_desc'] = 'Automatically insert closing brackets, quotes, and HTML/MODX tags when typing.';
 $_lang['setting_ace.draft_restore'] = 'Restore unsaved drafts';
 $_lang['setting_ace.draft_restore_desc'] = 'Save editor content to browser localStorage while you edit and offer to restore it after an accidental reload (7-day TTL).';
+$_lang['setting_ace.color_preview'] = 'CSS color preview';
+$_lang['setting_ace.color_preview_desc'] = 'Highlight #hex, rgb(), and hsl() color literals with a tinted background in CSS/HTML-related modes.';

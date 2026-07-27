@@ -34,3 +34,5 @@ $_lang['setting_ace.auto_close_tags'] = 'Tags und Klammern automatisch schließe
 $_lang['setting_ace.auto_close_tags_desc'] = 'Schließende Klammern, Anführungszeichen und HTML/MODX-Tags beim Tippen automatisch einfügen.';
 $_lang['setting_ace.draft_restore'] = 'Entwürfe wiederherstellen';
 $_lang['setting_ace.draft_restore_desc'] = 'Editor-Inhalt im Browser localStorage speichern und nach versehentlichem Neuladen wieder anbieten (7 Tage TTL).';
+$_lang['setting_ace.color_preview'] = 'CSS-Farbvorschau';
+$_lang['setting_ace.color_preview_desc'] = '#hex-, rgb()- und hsl()-Farbwerte in CSS/HTML-Modi mit getöntem Hintergrund markieren.';

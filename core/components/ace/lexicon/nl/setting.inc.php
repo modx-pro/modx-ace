@@ -30,3 +30,5 @@ $_lang['setting_ace.auto_close_tags'] = 'Tags en haakjes automatisch sluiten';
 $_lang['setting_ace.auto_close_tags_desc'] = 'Sluitende haakjes, aanhalingstekens en HTML/MODX-tags automatisch invoegen bij typen.';
 $_lang['setting_ace.draft_restore'] = 'Concepten herstellen';
 $_lang['setting_ace.draft_restore_desc'] = 'Editor-inhoud opslaan in browser localStorage en aanbieden na per ongeluk herladen (7 dagen TTL).';
+$_lang['setting_ace.color_preview'] = 'CSS-kleurvoorbeeld';
+$_lang['setting_ace.color_preview_desc'] = 'Markeer #hex-, rgb()- en hsl()-kleuren met een getinte achtergrond in CSS/HTML-modi.';

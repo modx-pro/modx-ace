@@ -455,6 +455,10 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
 
         this.setMimeType(this.mimeType);
 
+        if (MODx.ux.Ace.ColorPreview) {
+            MODx.ux.Ace.ColorPreview.init(this.editor, this.mimeType);
+        }
+
         if (!MODx.ux.Ace.initialized) {
             var style = "\
                 .ace_maximized {position: fixed; border: none; top: 60px; left: 70px; right: 3px; bottom: 3px; width: auto !important; height: auto !important; margin: 0; z-index: 12000}\
