@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resource content form: `use_editor` is read from the current context override when available, not only the global system setting ([#35](https://github.com/modx-pro/modx-ace/issues/35)).
 - `onDestroy` no longer throws when Ace was never initialized (destroy before `onRender` or partial Ext component) ([#32](https://github.com/modx-pro/modx-ace/issues/32)).
 - SCSS/CSS/static chunks: MODX tag mixed mode is enabled only for HTML-like mime types (`text/html`, Smarty, Twig), so `//` and `/* */` comments highlight correctly instead of HTML `<!-- -->` ([#31](https://github.com/modx-pro/modx-ace/issues/31)).
+- Resource overview cache tab (`resource/data`): Ace initializes after cache buffer is loaded, so `modx-rdata-buffer` is not empty ([#28](https://github.com/modx-pro/modx-ace/issues/28)).
 
 ## [1.9.9] - 2026-03-29
 

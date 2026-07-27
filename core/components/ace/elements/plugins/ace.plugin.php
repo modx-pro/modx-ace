@@ -4,7 +4,7 @@
  *
  * Events: OnManagerPageBeforeRender, OnRichTextEditorRegister, OnSnipFormPrerender,
  * OnTempFormPrerender, OnChunkFormPrerender, OnPluginFormPrerender,
- * OnFileCreateFormPrerender, OnFileEditFormPrerender, OnDocFormPrerender
+ * OnFileCreateFormPrerender, OnFileEditFormPrerender, OnDocFormPrerender (incl. resource/data cache tab)
  *
  * @author Danil Kostin <danya.postfactum(at)gmail.com>
  *
@@ -53,6 +53,25 @@ if (!function_exists('aceMimeSupportsModxTags')) {
             'text/x-twig' => true,
         );
         return !empty($supported[$mimeType]);
+    }
+}
+
+if (!function_exists('aceIsResourceDataPage')) {
+    function aceIsResourceDataPage($modx) {
+        if (!$modx->controller) {
+            return false;
+        }
+        if (!empty($modx->controller->config['controller'])) {
+            $controller = strtolower(str_replace('\\', '/', $modx->controller->config['controller']));
+            if ($controller === 'resource/data') {
+                return true;
+            }
+        }
+        $action = $modx->getOption('action', $_REQUEST, '');
+        if ($action === '' && !empty($_REQUEST['a'])) {
+            $action = (string) $_REQUEST['a'];
+        }
+        return strtolower(str_replace('\\', '/', $action)) === 'resource/data';
     }
 }
 
@@ -156,6 +175,15 @@ switch ($modx->event->name) {
                 $field = false;
             }
         }
+        $modxTags = aceMimeSupportsModxTags($mimeType);
+        break;
+    case 'OnManagerPageBeforeRender':
+        // Resource overview cache tab: buffer loads asynchronously after panel render (#28).
+        if (!aceIsResourceDataPage($modx)) {
+            return;
+        }
+        $field = 'modx-rdata-buffer';
+        $mimeType = $html_elements_mime;
         $modxTags = aceMimeSupportsModxTags($mimeType);
         break;
     case 'OnTVInputRenderList':
