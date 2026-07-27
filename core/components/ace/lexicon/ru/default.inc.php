@@ -22,3 +22,6 @@ $_lang['ui_ace.replace'] = 'Заменить';
 $_lang['ui_ace.replace_all'] = 'Всё';
 $_lang['ui_ace.replace_with'] = 'Заменить на';
 $_lang['ui_ace.whole_word'] = 'Целые слова';
+$_lang['ui_ace.draft_restore_prompt'] = 'Для этого поля найден несохранённый черновик.';
+$_lang['ui_ace.draft_restore_yes'] = 'Восстановить';
+$_lang['ui_ace.draft_restore_discard'] = 'Отменить';

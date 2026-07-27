@@ -32,3 +32,5 @@ $_lang['setting_ace.html_elements_mime'] = 'MIME-Typ für HTML-Elemente';
 $_lang['setting_ace.html_elements_mime_desc'] = 'Dieser Typ wird vom Editor für HTML-Elemente verwendet - Vorlagen, Chunks und Ressourcen mit HTML-Typ. Wenn nicht angegeben, wird der Standardtyp verwendet';
 $_lang['setting_ace.auto_close_tags'] = 'Tags und Klammern automatisch schließen';
 $_lang['setting_ace.auto_close_tags_desc'] = 'Schließende Klammern, Anführungszeichen und HTML/MODX-Tags beim Tippen automatisch einfügen.';
+$_lang['setting_ace.draft_restore'] = 'Entwürfe wiederherstellen';
+$_lang['setting_ace.draft_restore_desc'] = 'Editor-Inhalt im Browser localStorage speichern und nach versehentlichem Neuladen wieder anbieten (7 Tage TTL).';

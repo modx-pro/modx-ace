@@ -109,4 +109,13 @@ $settings['auto_close_tags']->fromArray(array(
         'area' => 'general'
     ),'',true,true);
 
+$settings['draft_restore']= $modx->newObject('modSystemSetting');
+$settings['draft_restore']->fromArray(array(
+        'key' => 'ace.draft_restore',
+        'xtype' => 'combo-boolean',
+        'value' => '0',
+        'namespace' => 'ace',
+        'area' => 'general'
+    ),'',true,true);
+
 return $settings;

@@ -32,3 +32,5 @@ $_lang['setting_ace.html_elements_mime'] = 'MIME-type для html элемент
 $_lang['setting_ace.html_elements_mime_desc'] = 'Этот тип будет использован редактором для html элементов - шаблонов, чанков и ресурсов с типом html. Если не указан будет использован тип по умолчанию';
 $_lang['setting_ace.auto_close_tags'] = 'Автозакрытие тегов и скобок';
 $_lang['setting_ace.auto_close_tags_desc'] = 'Автоматически вставлять закрывающие скобки, кавычки и HTML/MODX-теги при вводе.';
+$_lang['setting_ace.draft_restore'] = 'Восстановление черновиков';
+$_lang['setting_ace.draft_restore_desc'] = 'Сохранять текст редактора в localStorage и предлагать восстановление после случайной перезагрузки (срок хранения 7 дней).';

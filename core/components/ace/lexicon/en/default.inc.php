@@ -22,3 +22,6 @@ $_lang['ui_ace.replace'] = 'Replace';
 $_lang['ui_ace.replace_all'] = 'All';
 $_lang['ui_ace.replace_with'] = 'Replace with';
 $_lang['ui_ace.whole_word'] = 'Whole words';
+$_lang['ui_ace.draft_restore_prompt'] = 'An unsaved draft was found for this field.';
+$_lang['ui_ace.draft_restore_yes'] = 'Restore draft';
+$_lang['ui_ace.draft_restore_discard'] = 'Discard';

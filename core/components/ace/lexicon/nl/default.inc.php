@@ -23,3 +23,6 @@ $_lang['ui_ace.replace'] = 'Vervangen';
 $_lang['ui_ace.replace_all'] = 'Alle';
 $_lang['ui_ace.replace_with'] = 'Vervang met';
 $_lang['ui_ace.whole_word'] = 'Hele woorden';
+$_lang['ui_ace.draft_restore_prompt'] = 'Er is een niet-opgeslagen concept voor dit veld gevonden.';
+$_lang['ui_ace.draft_restore_yes'] = 'Concept herstellen';
+$_lang['ui_ace.draft_restore_discard'] = 'Verwerpen';
