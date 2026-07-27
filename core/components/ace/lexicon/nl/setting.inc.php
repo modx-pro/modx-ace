@@ -28,3 +28,5 @@ $_lang['setting_ace.html_elements_mime'] = 'MIME-type voor html-elementen';
 $_lang['setting_ace.html_elements_mime_desc'] = 'Dit type wordt door de editor gebruikt voor html-elementen - sjablonen, chunks en bronnen met html-type. Als dit niet wordt opgegeven, wordt het standaardtype gebruikt';
 $_lang['setting_ace.auto_close_tags'] = 'Tags en haakjes automatisch sluiten';
 $_lang['setting_ace.auto_close_tags_desc'] = 'Sluitende haakjes, aanhalingstekens en HTML/MODX-tags automatisch invoegen bij typen.';
+$_lang['setting_ace.draft_restore'] = 'Concepten herstellen';
+$_lang['setting_ace.draft_restore_desc'] = 'Editor-inhoud opslaan in browser localStorage en aanbieden na per ongeluk herladen (7 dagen TTL).';

@@ -265,6 +265,133 @@ MODx.ux.Ace.isAutoCloseTagsEnabled = function() {
     return value == true || value === '1' || value === 1;
 };
 
+MODx.ux.Ace.isDraftRestoreEnabled = function() {
+    var value = MODx.config['ace.draft_restore'];
+    return value == true || value === '1' || value === 1;
+};
+
+MODx.ux.Ace.DraftManager = {
+    TTL_MS: 7 * 24 * 60 * 60 * 1000,
+    debounceMs: 500,
+
+    getStorageKey: function(field) {
+        var action = (MODx.request && MODx.request.a) ? MODx.request.a : 'manager';
+        var id = (MODx.request && MODx.request.id) ? MODx.request.id : '0';
+        var name = field.name || field.id || 'field';
+        return 'ace:draft:' + action + ':' + name + ':' + id;
+    },
+
+    readDraft: function(key) {
+        try {
+            var raw = localStorage.getItem(key);
+            if (!raw) {
+                return null;
+            }
+            var data = JSON.parse(raw);
+            if (!data || typeof data.value !== 'string') {
+                return null;
+            }
+            if (data.ts && (Date.now() - data.ts) > this.TTL_MS) {
+                localStorage.removeItem(key);
+                return null;
+            }
+            return data;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    writeDraft: function(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify({value: value, ts: Date.now()}));
+        } catch (e) {}
+    },
+
+    clearDraft: function(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (e) {}
+    },
+
+    bind: function(field, textEditor) {
+        if (!MODx.ux.Ace.isDraftRestoreEnabled() || field.readOnly === true) {
+            return;
+        }
+
+        var self = this;
+        var key = this.getStorageKey(field);
+        var initialValue = textEditor.getValue();
+        var draft = this.readDraft(key);
+
+        if (draft && draft.value !== initialValue) {
+            this.showRestoreBanner(textEditor, key, draft.value);
+        }
+
+        var saveTimer = null;
+        textEditor.editor.getSession().on('change', function() {
+            if (saveTimer) {
+                clearTimeout(saveTimer);
+            }
+            saveTimer = setTimeout(function() {
+                self.writeDraft(key, textEditor.getValue());
+            }, self.debounceMs);
+        });
+
+        var panel = field.findParentBy ? field.findParentBy(function(c) {
+            return c && c.getForm && c.getForm();
+        }) : null;
+        if (panel) {
+            panel.on('success', function() {
+                self.clearDraft(key);
+            });
+            var form = panel.getForm();
+            if (form) {
+                form.on('actioncomplete', function(f, action) {
+                    if (action && action.result && action.result.success) {
+                        self.clearDraft(key);
+                    }
+                });
+            }
+        }
+    },
+
+    showRestoreBanner: function(textEditor, key, draftValue) {
+        var banner = document.createElement('div');
+        banner.className = 'ace-draft-restore-banner';
+        banner.style.cssText = 'padding:6px 10px;background:#fff3cd;border:1px solid #ffc107;margin-bottom:4px;font-size:12px;';
+        banner.appendChild(document.createTextNode(_('ui_ace.draft_restore_prompt') + ' '));
+
+        var restoreLink = document.createElement('a');
+        restoreLink.href = '#';
+        restoreLink.className = 'ace-draft-restore-yes';
+        restoreLink.appendChild(document.createTextNode(_('ui_ace.draft_restore_yes')));
+        restoreLink.onclick = function(e) {
+            e.preventDefault();
+            textEditor.setValue(draftValue);
+            if (banner.parentNode) {
+                banner.parentNode.removeChild(banner);
+            }
+        };
+
+        var discardLink = document.createElement('a');
+        discardLink.href = '#';
+        discardLink.className = 'ace-draft-restore-no';
+        discardLink.appendChild(document.createTextNode(_('ui_ace.draft_restore_discard')));
+        discardLink.onclick = function(e) {
+            e.preventDefault();
+            MODx.ux.Ace.DraftManager.clearDraft(key);
+            if (banner.parentNode) {
+                banner.parentNode.removeChild(banner);
+            }
+        };
+
+        banner.appendChild(restoreLink);
+        banner.appendChild(document.createTextNode(' | '));
+        banner.appendChild(discardLink);
+        textEditor.el.dom.parentNode.insertBefore(banner, textEditor.el.dom);
+    }
+};
+
 MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
 
     mimeType : 'text/plain',
@@ -659,6 +786,7 @@ MODx.ux.Ace.replaceComponent = function(id, mimeType, modxTags, options) {
         };
     }
     textArea.on('destroy', function() {textEditor.destroy();});
+    MODx.ux.Ace.DraftManager.bind(textArea, textEditor);
     if (!modxTags)
         return;
     var dropTarget = MODx.load({
@@ -692,6 +820,7 @@ MODx.ux.Ace.replaceTextAreas = function(textAreas, mimeType) {
 
         editor.render(textArea.parentNode);
         editor.editor.on('change', function(e){ MODx.fireResourceFormChange() });
+        MODx.ux.Ace.DraftManager.bind({name: textArea.name, id: textArea.id, readOnly: textArea.readOnly}, editor);
     });
 };
 
@@ -721,6 +850,7 @@ MODx.ux.Ace.replaceTextArea = function(id, config) {
 
     editor.render(textArea.parentNode);
     editor.editor.on('change', function(e){ MODx.fireResourceFormChange() });
+    MODx.ux.Ace.DraftManager.bind({name: textArea.name, id: textArea.id, readOnly: textArea.readOnly}, editor);
     new IntersectionObserver(function(){
         editor.editor.resize(true);
         var tabs = Ext.get('modx-tv-tabs');

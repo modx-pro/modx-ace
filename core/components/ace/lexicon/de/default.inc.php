@@ -22,3 +22,6 @@ $_lang['ui_ace.replace'] = 'Ersetzen';
 $_lang['ui_ace.replace_all'] = 'Alle';
 $_lang['ui_ace.replace_with'] = 'Ersetzen durch';
 $_lang['ui_ace.whole_word'] = 'Ganze W&ouml;rter';
+$_lang['ui_ace.draft_restore_prompt'] = 'Für dieses Feld wurde ein nicht gespeicherter Entwurf gefunden.';
+$_lang['ui_ace.draft_restore_yes'] = 'Entwurf wiederherstellen';
+$_lang['ui_ace.draft_restore_discard'] = 'Verwerfen';
