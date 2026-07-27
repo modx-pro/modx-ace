@@ -30,3 +30,5 @@ $_lang['setting_ace.grow'] = 'Höhe an Text anpassen';
 $_lang['setting_ace.grow_desc'] = 'Die Höhe des Editors wird an den Text angepasst. Die minimale Höhe entspricht der Option ace.height. Mögliche Werte: Leer - Höhe passt nicht zum Text; Die Zahl ist größer als 0 - die Höhe wird an den Text angepasst, aber nicht mehr als der Wert; 0 - Höhe ist für Text angepasst, Höhe ist unbegrenzt.';
 $_lang['setting_ace.html_elements_mime'] = 'MIME-Typ für HTML-Elemente';
 $_lang['setting_ace.html_elements_mime_desc'] = 'Dieser Typ wird vom Editor für HTML-Elemente verwendet - Vorlagen, Chunks und Ressourcen mit HTML-Typ. Wenn nicht angegeben, wird der Standardtyp verwendet';
+$_lang['setting_ace.auto_close_tags'] = 'Tags und Klammern automatisch schließen';
+$_lang['setting_ace.auto_close_tags_desc'] = 'Schließende Klammern, Anführungszeichen und HTML/MODX-Tags beim Tippen automatisch einfügen.';

@@ -100,4 +100,13 @@ $settings['html_elements_mime']->fromArray(array(
         'area' => 'general'
     ),'',true,true);
 
+$settings['auto_close_tags']= $modx->newObject('modSystemSetting');
+$settings['auto_close_tags']->fromArray(array(
+        'key' => 'ace.auto_close_tags',
+        'xtype' => 'combo-boolean',
+        'value' => '1',
+        'namespace' => 'ace',
+        'area' => 'general'
+    ),'',true,true);
+
 return $settings;

@@ -30,3 +30,5 @@ $_lang['setting_ace.grow'] = 'Fit height to text';
 $_lang['setting_ace.grow_desc'] = 'The height of the editor will be adjusted to the text. The minimum height will be equal to the option ace.height. Possible values: Empty - height does not fit the text; The number is greater than 0 - the height is adjusted to the text but not more than the value; 0 - height is customized for text, height is unlimited. ';
 $_lang['setting_ace.html_elements_mime'] = 'MIME-type for html elements';
 $_lang['setting_ace.html_elements_mime_desc'] = 'This type will be used by the editor for html elements - templates, chunks and resources with html type. If not specified, the default type will be used';
+$_lang['setting_ace.auto_close_tags'] = 'Auto-close tags and brackets';
+$_lang['setting_ace.auto_close_tags_desc'] = 'Automatically insert closing brackets, quotes, and HTML/MODX tags when typing.';
