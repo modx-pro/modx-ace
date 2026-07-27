@@ -41,6 +41,7 @@ class Ace {
             $this->modx->controller->addJavascript($this->config['assetsUrl'] . 'ace/ext-language_tools.js');
             $this->modx->controller->addJavascript($this->config['assetsUrl'] . 'ace/ext-keybinding_menu.js');
             $this->modx->controller->addJavascript($this->config['assetsUrl'] . 'ace/ext-emmet.js');
+            $this->modx->controller->addJavascript($this->config['assetsUrl'] . 'ace-utils.js');
             $this->modx->controller->addJavascript($this->config['assetsUrl'] . 'modx.texteditor.js');
             $this->modx->controller->addJavascript($this->config['assetsUrl'] . 'ace-color-preview.js');
 

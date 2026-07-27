@@ -31,6 +31,19 @@
 
 Поиск корня MODX: `MODX_BASE_PATH` → `core/config/config.inc.php` вверх по каталогам → `core/model/modx/modx.class.php`.
 
+## Тесты
+
+Юнит-тесты покрывают хелперы плагина (RTE/mime/context) и чистую JS-логику (`ace-utils.js`).
+
+```bash
+composer install
+vendor/bin/phpunit
+
+npm test
+```
+
+Требования: PHP 7.4+, Node.js 18+.
+
 ## Структура репозитория
 
 | Путь | Назначение |
@@ -38,6 +51,7 @@
 | `core/components/ace/` | PHP-модель, плагин, процессоры автодополнения, лексиконы, TV input |
 | `assets/components/ace/` | JS (Ace, `modx.texteditor.js`), Emmet, `completions.php` |
 | `_build/` | Конфиг и скрипт сборки транспорта, резолвер установки |
+| `tests/` | PHPUnit (`tests/php`) и Node (`tests/js`) |
 
 ## Документация и история изменений
 

@@ -1,15 +1,13 @@
 Ext.namespace('MODx.ux');
 
 MODx.ux.Ace.isColorPreviewEnabled = function() {
-    var value = MODx.config['ace.color_preview'];
-    return value == true || value === '1' || value === 1;
+    var utils = MODx.ux.Ace.Utils || MODx.ux.AceUtils;
+    return utils.parseBoolSetting(MODx.config['ace.color_preview'], false);
 };
 
 MODx.ux.Ace.supportsColorPreview = function(mimeType) {
-    if (!mimeType) {
-        return false;
-    }
-    return /css|scss|less|html|smarty|twig|svg/i.test(mimeType);
+    var utils = MODx.ux.Ace.Utils || MODx.ux.AceUtils;
+    return utils.mimeSupportsColorPreview(mimeType);
 };
 
 /**
@@ -96,7 +94,8 @@ MODx.ux.Ace.ColorPreview = {
 
         var session = editor.getSession();
         var Range = ace.require('ace/range').Range;
-        var self = this;
+        var utils = MODx.ux.Ace.Utils || MODx.ux.AceUtils;
+        var regex = new RegExp(utils.COLOR_LITERAL_REGEX.source, 'g');
 
         instance.markerIds.forEach(function(markerId) {
             session.removeMarker(markerId);
@@ -106,14 +105,13 @@ MODx.ux.Ace.ColorPreview = {
         var lines = session.doc.getAllLines();
         var end = Math.min(lines.length, this.MAX_SCAN_LINES);
         var rules = [];
-        var regex = /#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b|rgba?\(\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)|hsla?\(\s*-?\d+(?:\.\d+)?\s*,\s*\d+(?:\.\d+)?%\s*,\s*\d+(?:\.\d+)?%(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)/g;
 
         for (var row = 0; row < end; row++) {
             var line = lines[row];
             var match;
             regex.lastIndex = 0;
             while ((match = regex.exec(line)) !== null) {
-                var color = self.normalizeColor(match[0]);
+                var color = utils.normalizeCssColor(match[0]);
                 if (!color) {
                     continue;
                 }
@@ -134,13 +132,8 @@ MODx.ux.Ace.ColorPreview = {
     },
 
     normalizeColor: function(value) {
-        if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value)) {
-            return value;
-        }
-        if (/^rgba?\(/i.test(value) || /^hsla?\(/i.test(value)) {
-            return value;
-        }
-        return null;
+        var utils = MODx.ux.Ace.Utils || MODx.ux.AceUtils;
+        return utils.normalizeCssColor(value);
     },
 
     debounce: function(fn, ms) {
