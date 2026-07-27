@@ -42,6 +42,20 @@ if (!function_exists('aceIsNonAceRichTextEditor')) {
     }
 }
 
+if (!function_exists('aceMimeSupportsModxTags')) {
+    function aceMimeSupportsModxTags($mimeType) {
+        if ($mimeType === '' || strpos($mimeType, '@FILE:') === 0) {
+            return false;
+        }
+        static $supported = array(
+            'text/html' => true,
+            'text/x-smarty' => true,
+            'text/x-twig' => true,
+        );
+        return !empty($supported[$mimeType]);
+    }
+}
+
 $extensionMap = array(
     'tpl'   => 'text/x-smarty',
     'htm'   => 'text/html',
@@ -87,8 +101,8 @@ switch ($modx->event->name) {
         break;
     case 'OnTempFormPrerender':
         $field = 'modx-template-content';
-        $modxTags = true;
         $mimeType = $html_elements_mime;
+        $modxTags = aceMimeSupportsModxTags($mimeType);
         break;
     case 'OnChunkFormPrerender':
         $field = 'modx-chunk-snippet';
@@ -101,7 +115,7 @@ switch ($modx->event->name) {
         } else {
             $mimeType = $html_elements_mime;
         }
-        $modxTags = true;
+        $modxTags = aceMimeSupportsModxTags($mimeType);
         break;
     case 'OnPluginFormPrerender':
         $field = 'modx-plugin-plugincode';
@@ -117,7 +131,7 @@ switch ($modx->event->name) {
         $mimeType = isset($extensionMap[$extension])
             ? $extensionMap[$extension]
             : ('@FILE:' . pathinfo($scriptProperties['file'], PATHINFO_BASENAME));
-        $modxTags = $extension == 'tpl';
+        $modxTags = aceMimeSupportsModxTags($mimeType);
         break;
     case 'OnDocFormPrerender':
         // Resource content: respect per-context use_editor (#35) and which_editor (#30).
@@ -142,7 +156,7 @@ switch ($modx->event->name) {
                 $field = false;
             }
         }
-        $modxTags = true;
+        $modxTags = aceMimeSupportsModxTags($mimeType);
         break;
     case 'OnTVInputRenderList':
         $modx->event->output($corePath . 'elements/tv/input/');
