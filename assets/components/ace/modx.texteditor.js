@@ -598,17 +598,18 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
     }
 });
 
+if (MODx.ux.AceUtils) {
+    MODx.ux.Ace.Utils = MODx.ux.AceUtils;
+}
+
 MODx.ux.Ace.isAutoCloseTagsEnabled = function() {
-    var value = MODx.config['ace.auto_close_tags'];
-    if (value === undefined || value === null || value === '') {
-        return true;
-    }
-    return value == true || value === '1' || value === 1;
+    var utils = MODx.ux.Ace.Utils || MODx.ux.AceUtils;
+    return utils.parseBoolSetting(MODx.config['ace.auto_close_tags'], true);
 };
 
 MODx.ux.Ace.isDraftRestoreEnabled = function() {
-    var value = MODx.config['ace.draft_restore'];
-    return value == true || value === '1' || value === 1;
+    var utils = MODx.ux.Ace.Utils || MODx.ux.AceUtils;
+    return utils.parseBoolSetting(MODx.config['ace.draft_restore'], false);
 };
 
 MODx.ux.Ace.DraftManager = {
@@ -617,13 +618,14 @@ MODx.ux.Ace.DraftManager = {
     _boundKeys: {},
 
     getStorageKey: function(field) {
+        var utils = MODx.ux.Ace.Utils || MODx.ux.AceUtils;
         var action = (MODx.request && MODx.request.a) ? String(MODx.request.a) : 'manager';
         var id = (MODx.request && MODx.request.id) ? String(MODx.request.id) : 'new';
         var name = field.name || field.id || 'field';
         if (!field.name && field.id) {
             name = field.id;
         }
-        return 'ace:draft:' + encodeURIComponent(action) + ':' + encodeURIComponent(name) + ':' + encodeURIComponent(id);
+        return utils.draftStorageKey(action, name, id);
     },
 
     findFormPanel: function(field) {
@@ -718,7 +720,8 @@ MODx.ux.Ace.DraftManager = {
         var draft = this.readDraft(key);
 
         // Offer restore only when draft differs and is non-empty (avoid noise for intentional clear).
-        if (draft && draft.value !== '' && draft.value !== initialValue) {
+        var utils = MODx.ux.Ace.Utils || MODx.ux.AceUtils;
+        if (draft && utils.shouldOfferDraftRestore(draft.value, initialValue)) {
             this.showRestoreBanner(textEditor, key, draft.value);
         }
 
@@ -788,7 +791,8 @@ MODx.ux.Ace.replaceComponent = function(id, mimeType, modxTags, options) {
     }
 
     // Async cache buffer on resource overview only (#28). Do not delay empty new chunks/files.
-    if (id === 'modx-rdata-buffer' && options.waitForValue !== false) {
+    var utils = MODx.ux.Ace.Utils || MODx.ux.AceUtils;
+    if (utils.shouldWaitForAsyncBuffer(id) && options.waitForValue !== false) {
         var value = textArea.getValue();
         if (!value) {
             var panel = Ext.getCmp('modx-panel-resource-data');

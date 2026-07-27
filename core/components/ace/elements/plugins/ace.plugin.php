@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Ace Source Editor Plugin
  *
@@ -26,63 +27,7 @@ $corePath = $modx->getOption('ace.core_path', null, $modx->getOption('core_path'
 $ace = $modx->getService('ace', 'Ace', $corePath . 'model/ace/');
 $ace->initialize();
 
-if (!function_exists('aceGetEffectiveUseEditor')) {
-    function aceGetEffectiveUseEditor($modx) {
-        if ($modx->controller && !empty($modx->controller->context)) {
-            return (bool) $modx->controller->context->getOption('use_editor', $modx->getOption('use_editor'));
-        }
-        return (bool) $modx->getOption('use_editor');
-    }
-}
-
-if (!function_exists('aceGetEffectiveWhichEditor')) {
-    function aceGetEffectiveWhichEditor($modx) {
-        if ($modx->controller && !empty($modx->controller->context)) {
-            return trim((string) $modx->controller->context->getOption('which_editor', $modx->getOption('which_editor', '')));
-        }
-        return trim((string) $modx->getOption('which_editor', ''));
-    }
-}
-
-if (!function_exists('aceIsNonAceRichTextEditor')) {
-    function aceIsNonAceRichTextEditor($modx) {
-        $whichEditor = aceGetEffectiveWhichEditor($modx);
-        return $whichEditor !== '' && strcasecmp($whichEditor, 'Ace') !== 0;
-    }
-}
-
-if (!function_exists('aceMimeSupportsModxTags')) {
-    function aceMimeSupportsModxTags($mimeType) {
-        if ($mimeType === '' || strpos($mimeType, '@FILE:') === 0) {
-            return false;
-        }
-        static $supported = array(
-            'text/html' => true,
-            'text/x-smarty' => true,
-            'text/x-twig' => true,
-        );
-        return !empty($supported[$mimeType]);
-    }
-}
-
-if (!function_exists('aceIsResourceDataPage')) {
-    function aceIsResourceDataPage($modx) {
-        if (!$modx->controller) {
-            return false;
-        }
-        if (!empty($modx->controller->config['controller'])) {
-            $controller = strtolower(str_replace('\\', '/', $modx->controller->config['controller']));
-            if ($controller === 'resource/data') {
-                return true;
-            }
-        }
-        $action = $modx->getOption('action', $_REQUEST, '');
-        if ($action === '' && !empty($_REQUEST['a'])) {
-            $action = (string) $_REQUEST['a'];
-        }
-        return strtolower(str_replace('\\', '/', $action)) === 'resource/data';
-    }
-}
+require_once $corePath . 'includes/helpers.php';
 
 $extensionMap = array(
     'tpl'   => 'text/x-smarty',

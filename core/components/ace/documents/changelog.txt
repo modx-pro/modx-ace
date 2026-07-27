@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - System setting `ace.draft_restore` to save editor drafts in browser localStorage and restore after accidental reload ([#33](https://github.com/modx-pro/modx-ace/issues/33)).
 - System setting `ace.color_preview` to tint CSS color literals (#hex, rgb/hsl) in CSS/HTML modes ([#34](https://github.com/modx-pro/modx-ace/issues/34)).
 - System setting `ace.auto_close_tags` to disable automatic closing of HTML tags, brackets, and MODX tag pairs ([#29](https://github.com/modx-pro/modx-ace/issues/29)).
+- Unit tests for plugin helpers and shared JS utils (`composer test`, `npm test`).
 
 ### Fixed
 - Ctrl+S / Cmd+S in fullscreen on chunk/template/element forms: save showed success but wrote stale content because the hidden field left the form when the editor moved to `document.body`. The named input now stays in the form; `getValue()` syncs from Ace before submit; `MODx.onSaveEditor` syncs the original Ext field ([#25](https://github.com/modx-pro/modx-ace/issues/25)).
