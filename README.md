@@ -2,7 +2,7 @@
 
 Интеграция [Ace](https://ace.c9.io/) (редактор кода) в **MODX Revolution** (2.x и 3.x): подсветка синтаксиса, автодополнение, темы, TV-поле и плагин для менеджера.
 
-**Версия пакета:** 1.9.9 (см. `_build/build.config.php` и `core/components/ace/documents/changelog.txt`)
+**Версия пакета:** 1.9.10 (см. `_build/build.config.php` и `core/components/ace/documents/changelog.txt`)
 
 ## Возможности
 
