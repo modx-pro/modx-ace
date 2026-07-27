@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.10] - 2026-07-27
 
+### Added
+- System setting `ace.auto_close_tags` to disable automatic closing of HTML tags, brackets, and MODX tag pairs ([#29](https://github.com/modx-pro/modx-ace/issues/29)).
+
 ### Fixed
 - Ctrl+S / Cmd+S in fullscreen on chunk/template/element forms: save showed success but wrote stale content because the hidden field left the form when the editor moved to `document.body`. The named input now stays in the form; `getValue()` syncs from Ace before submit; `MODx.onSaveEditor` syncs the original Ext field ([#25](https://github.com/modx-pro/modx-ace/issues/25)).
 - Resource content form: Ace no longer replaces `#ta` when another RTE is configured (`which_editor` ≠ Ace). With `use_editor=Yes` and e.g. TinyMCE, non-richtext resources keep a plain textarea instead of Ace ([#30](https://github.com/modx-pro/modx-ace/issues/30)).

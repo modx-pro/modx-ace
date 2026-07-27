@@ -257,6 +257,14 @@ Ext.reg('ace', Ext.ux.Ace);
 
 Ext.namespace('MODx.ux');
 
+MODx.ux.Ace.isAutoCloseTagsEnabled = function() {
+    var value = MODx.config['ace.auto_close_tags'];
+    if (value === undefined || value === null || value === '') {
+        return true;
+    }
+    return value == true || value === '1' || value === 1;
+};
+
 MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
 
     mimeType : 'text/plain',
@@ -295,6 +303,8 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
 
     onRender : function (ct, position) {
         MODx.ux.Ace.superclass.onRender.call(this, ct, position);
+
+        this.editor.setBehavioursEnabled(MODx.ux.Ace.isAutoCloseTagsEnabled());
 
         var TokenIterator = ace.require("ace/token_iterator").TokenIterator;
         var userAgent = ace.require("ace/lib/useragent");
@@ -911,6 +921,7 @@ MODx.ux.Ace.createModxMixedMode = function(Mode) {
 
         this.HighlightRules = ModxMixedHighlightRules;
 
+        if (MODx.ux.Ace.isAutoCloseTagsEnabled()) {
         if (typeof this.$behaviour == 'undefined') {
             var Behaviour = ace.require("ace/mode/behaviour").Behaviour;
         }
@@ -1020,6 +1031,7 @@ MODx.ux.Ace.createModxMixedMode = function(Mode) {
                 }
             }
         });
+        }
     }
     ModxMixedMode.prototype = Object.create(Mode.prototype, {
         constructor: {value: ModxMixedMode}

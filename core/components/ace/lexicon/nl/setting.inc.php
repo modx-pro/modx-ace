@@ -26,3 +26,5 @@ $_lang['setting_ace.grow'] = 'Pas hoogte aan tekst aan';
 $_lang['setting_ace.grow_desc'] = 'De hoogte van de editor wordt aangepast aan de tekst. De minimale hoogte is gelijk aan de optie aashoogte. Mogelijke waarden: leeg - hoogte past niet in de tekst; Het aantal is groter dan 0 - de hoogte is aangepast aan de tekst, maar niet hoger dan de waarde; 0 - hoogte is aangepast voor tekst, hoogte is onbeperkt. ';
 $_lang['setting_ace.html_elements_mime'] = 'MIME-type voor html-elementen';
 $_lang['setting_ace.html_elements_mime_desc'] = 'Dit type wordt door de editor gebruikt voor html-elementen - sjablonen, chunks en bronnen met html-type. Als dit niet wordt opgegeven, wordt het standaardtype gebruikt';
+$_lang['setting_ace.auto_close_tags'] = 'Tags en haakjes automatisch sluiten';
+$_lang['setting_ace.auto_close_tags_desc'] = 'Sluitende haakjes, aanhalingstekens en HTML/MODX-tags automatisch invoegen bij typen.';
