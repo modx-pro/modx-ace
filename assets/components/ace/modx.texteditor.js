@@ -449,15 +449,59 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
         if (this.isFullscreen){
             this.maximizer.title = this.maximizeTitle;
             this.el.removeClass('ace_maximized');
+            this.clearFullscreenInsets();
             this.restoreAceFromFullscreenBody();
         } else {
             this.moveAceToFullscreenBody();
             this.el.addClass('ace_maximized');
+            this.applyFullscreenInsets();
+            this.bindFullscreenResize();
             this.maximizer.title = this.minimizeTitle;
         }
         this.isFullscreen = !this.isFullscreen;
         this.onResize();
         this.syncAceOwnerLayout();
+    },
+
+    applyFullscreenInsets : function() {
+        if (!this.el || !this.el.dom) {
+            return;
+        }
+        var utils = (typeof MODx !== 'undefined' && MODx.ux)
+            ? (MODx.ux.AceUtils || (MODx.ux.Ace && MODx.ux.Ace.Utils))
+            : null;
+        var header = document.getElementById('modx-header');
+        var buttons = document.getElementById('modx-action-buttons');
+        var insets = utils && utils.fullscreenInsets
+            ? utils.fullscreenInsets(
+                header ? header.getBoundingClientRect() : null,
+                buttons ? buttons.getBoundingClientRect() : null
+            )
+            : {top: 60, left: 70};
+        this.el.dom.style.top = insets.top + 'px';
+        this.el.dom.style.left = insets.left + 'px';
+    },
+
+    clearFullscreenInsets : function() {
+        if (!this.el || !this.el.dom) {
+            return;
+        }
+        this.el.dom.style.top = '';
+        this.el.dom.style.left = '';
+    },
+
+    bindFullscreenResize : function() {
+        if (this._aceFsResize || !window.Ext || !Ext.EventManager) {
+            return;
+        }
+        this._aceFsResize = function() {
+            if (!this.isFullscreen) {
+                return;
+            }
+            this.applyFullscreenInsets();
+            this.onResize();
+        }.bind(this);
+        Ext.EventManager.onWindowResize(this._aceFsResize, this);
     },
 
     /**
@@ -513,8 +557,13 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
     },
 
     onDestroy : function() {
+        if (this._aceFsResize && window.Ext && Ext.EventManager) {
+            Ext.EventManager.removeResizeListener(this._aceFsResize, this);
+            this._aceFsResize = null;
+        }
         if (this.isFullscreen && this.el) {
             this.el.removeClass('ace_maximized');
+            this.clearFullscreenInsets();
             this.restoreAceFromFullscreenBody();
             this.isFullscreen = false;
         }
