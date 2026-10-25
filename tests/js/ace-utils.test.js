@@ -136,6 +136,79 @@ describe('stripModxScriptWrapper', () => {
   });
 });
 
+describe('fullscreenInsets', () => {
+  it('clears a left nav and a top action bar', () => {
+    assert.deepEqual(
+      utils.fullscreenInsets(
+        {left: 0, right: 70, top: 0, bottom: 800, width: 70, height: 800},
+        {top: 0, bottom: 60, width: 437, height: 60}
+      ),
+      {top: 60, left: 70}
+    );
+  });
+
+  it('grows when the nav or the action bar is larger', () => {
+    assert.deepEqual(
+      utils.fullscreenInsets(
+        {left: 0, right: 88.2, top: 0, bottom: 900, width: 88.2, height: 900},
+        {top: 0, bottom: 96.1, width: 500, height: 96.1}
+      ),
+      {top: 97, left: 89}
+    );
+  });
+
+  it('treats a wide header as a top bar', () => {
+    assert.deepEqual(
+      utils.fullscreenInsets(
+        {left: 0, right: 1400, top: 0, bottom: 48, width: 1400, height: 48},
+        {top: 48, bottom: 100, width: 400, height: 52}
+      ),
+      {top: 100, left: 0}
+    );
+  });
+
+  it('ignores action buttons that are not on the top edge', () => {
+    assert.deepEqual(
+      utils.fullscreenInsets(
+        {left: 0, right: 70, top: 0, bottom: 800, width: 70, height: 800},
+        {top: 400, bottom: 460, width: 400, height: 60}
+      ),
+      {top: 0, left: 70}
+    );
+  });
+
+  it('keeps a side nav that is not flush with the viewport', () => {
+    assert.deepEqual(
+      utils.fullscreenInsets(
+        {left: 8, right: 78, top: 0, bottom: 800, width: 70, height: 800},
+        {top: 0, bottom: 60, width: 400, height: 60}
+      ),
+      {top: 60, left: 78}
+    );
+  });
+
+  it('returns zero when the chrome is missing', () => {
+    assert.deepEqual(utils.fullscreenInsets(null, null), {top: 0, left: 0});
+  });
+
+  it('ignores an action bar that sits fully above the viewport', () => {
+    assert.deepEqual(
+      utils.fullscreenInsets(
+        {left: 0, right: 70, top: 0, bottom: 800, width: 70, height: 800},
+        {top: -100, bottom: -40, width: 400, height: 60}
+      ),
+      {top: 0, left: 70}
+    );
+  });
+
+  it('clears a bar that still crosses the top edge', () => {
+    assert.deepEqual(
+      utils.fullscreenInsets(null, {top: -10, bottom: 50, width: 200, height: 60}),
+      {top: 50, left: 0}
+    );
+  });
+});
+
 describe('shouldKeepEditorAfterModxPhpStrip', () => {
   const source = PHP_OPEN + '\necho 1;\n' + PHP_CLOSE;
 

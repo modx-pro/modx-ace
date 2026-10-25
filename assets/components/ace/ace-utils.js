@@ -130,6 +130,32 @@
         return stripModxScriptWrapper(current) === incoming;
     }
 
+    /**
+     * Fullscreen insets so the editor sits beside the manager nav and below
+     * the Save/Close bar. A narrow tall header is the side nav, even if it
+     * is a few pixels off the viewport edge. A wide short header is a top bar.
+     * Buttons count only when they sit on that top edge.
+     */
+    function fullscreenInsets(header, buttons) {
+        var top = 0;
+        var left = 0;
+        if (header && header.width > 0 && header.height > 0) {
+            var sideNav = header.height > header.width && header.right > header.left && header.right <= 240;
+            if (sideNav) {
+                left = header.right;
+            } else if (header.top <= 1) {
+                top = header.bottom;
+            }
+        }
+        if (buttons && buttons.width > 0 && buttons.height > 0 && buttons.bottom > top && buttons.top <= top + 1) {
+            top = buttons.bottom;
+        }
+        return {
+            top: Math.ceil(top),
+            left: Math.ceil(left)
+        };
+    }
+
     return {
         COLOR_LITERAL_REGEX: COLOR_LITERAL_REGEX,
         parseBoolSetting: parseBoolSetting,
@@ -139,6 +165,7 @@
         mimeSupportsColorPreview: mimeSupportsColorPreview,
         shouldWaitForAsyncBuffer: shouldWaitForAsyncBuffer,
         stripModxScriptWrapper: stripModxScriptWrapper,
-        shouldKeepEditorAfterModxPhpStrip: shouldKeepEditorAfterModxPhpStrip
+        shouldKeepEditorAfterModxPhpStrip: shouldKeepEditorAfterModxPhpStrip,
+        fullscreenInsets: fullscreenInsets
     };
 }));
