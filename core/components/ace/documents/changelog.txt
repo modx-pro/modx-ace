@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Undo (Ctrl+Z / Cmd+Z) still works after saving a chunk, template, or other Ace form. Save synced the editor with `session.setValue()` of the same text, and Ace resets its undo manager on that call ([#47](https://github.com/modx-pro/modx-ace/issues/47)).
+- Snippet and plugin editor keeps a leading `<?php` (and a trailing `?>`) after save. MODX `modScript::set()` stores the code without that wrapper and the save response was written back into Ace, so the tag disappeared immediately ([#48](https://github.com/modx-pro/modx-ace/issues/48)). The database still stores the code without the wrapper. After a reload the editor shows the stored source.
 
 ## [1.9.10] - 2026-07-27
 
