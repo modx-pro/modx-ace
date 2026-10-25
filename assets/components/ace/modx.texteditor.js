@@ -210,8 +210,17 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
 
     setValue : function (value){
         if (this.editor) {
-            this.editor.getSession().setValue(value);
-        } else {
+            var session = this.editor.getSession();
+            // EditSession.setValue() always resets the undo manager. Save and
+            // form setValues pass the current text back (#25); skip that when
+            // nothing changed so Ctrl+Z still works after save (#47).
+            if (session.getValue() !== value) {
+                session.setValue(value);
+            }
+            if (this.valueHolder) {
+                this.valueHolder.value = value;
+            }
+        } else if (this.valueHolder) {
             this.valueHolder.value = value;
         }
         this.value = value;
