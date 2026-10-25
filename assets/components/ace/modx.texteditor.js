@@ -211,16 +211,30 @@ Ext.ux.Ace = Ext.extend(Ext.form.TextField,  {
     setValue : function (value){
         if (this.editor) {
             var session = this.editor.getSession();
-            // EditSession.setValue() always resets the undo manager. Save and
-            // form setValues pass the current text back (#25); skip that when
-            // nothing changed so Ctrl+Z still works after save (#47).
-            if (session.getValue() !== value) {
+            var current = session.getValue();
+            var utils = (typeof MODx !== 'undefined' && MODx.ux)
+                ? (MODx.ux.AceUtils || (MODx.ux.Ace && MODx.ux.Ace.Utils))
+                : null;
+            // EditSession.setValue() always resets the undo manager (#47).
+            // MODX modScript::set() also strips a leading <?php and a trailing
+            // ?> before it returns the saved snippet or plugin (#48). Keep the
+            // buffer when that wrapper is the only difference.
+            var keep = current === value || (utils && utils.shouldKeepEditorAfterModxPhpStrip(
+                current,
+                value,
+                this.mimeType
+            ));
+            if (!keep) {
                 session.setValue(value);
+                current = value;
             }
             if (this.valueHolder) {
-                this.valueHolder.value = value;
+                this.valueHolder.value = current;
             }
-        } else if (this.valueHolder) {
+            this.value = current;
+            return;
+        }
+        if (this.valueHolder) {
             this.valueHolder.value = value;
         }
         this.value = value;

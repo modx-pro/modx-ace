@@ -89,3 +89,89 @@ describe('shouldWaitForAsyncBuffer', () => {
     assert.equal(utils.shouldWaitForAsyncBuffer('ta'), false);
   });
 });
+
+const PHP_OPEN = '<' + '?php';
+const PHP_SHORT = '<' + '?';
+const PHP_CLOSE = '?' + '>';
+
+describe('stripModxScriptWrapper', () => {
+  it('matches modScript::set for a normal open tag', () => {
+    assert.equal(
+      utils.stripModxScriptWrapper(PHP_OPEN + '\necho "ace-php-tag";\n'),
+      'echo "ace-php-tag";'
+    );
+  });
+
+  it('drops a short open tag and a closing tag', () => {
+    assert.equal(
+      utils.stripModxScriptWrapper(PHP_SHORT + ' echo 1; ' + PHP_CLOSE),
+      'echo 1;'
+    );
+  });
+
+  it('leaves a short echo as an equals sign', () => {
+    assert.equal(
+      utils.stripModxScriptWrapper(PHP_SHORT + '= $foo ' + PHP_CLOSE),
+      '= $foo'
+    );
+  });
+
+  it('does not treat PHP as case-insensitive', () => {
+    assert.equal(
+      utils.stripModxScriptWrapper(PHP_SHORT + 'PHP echo 1;'),
+      'PHP echo 1;'
+    );
+  });
+
+  it('keeps a tab that the second trim does not remove', () => {
+    assert.equal(
+      utils.stripModxScriptWrapper(PHP_OPEN + '\n\techo 1;'),
+      '\techo 1;'
+    );
+  });
+
+  it('does not strip a tag that is not at the edge', () => {
+    const body = 'echo ' + PHP_OPEN + ' 1;';
+    assert.equal(utils.stripModxScriptWrapper(body), body);
+  });
+});
+
+describe('shouldKeepEditorAfterModxPhpStrip', () => {
+  const source = PHP_OPEN + '\necho 1;\n' + PHP_CLOSE;
+
+  it('keeps the editor when the save response is only the wrapper strip', () => {
+    assert.equal(
+      utils.shouldKeepEditorAfterModxPhpStrip(source, 'echo 1;', 'application/x-php'),
+      true
+    );
+    assert.equal(
+      utils.shouldKeepEditorAfterModxPhpStrip(source, 'echo 1;', 'text/x-php'),
+      true
+    );
+  });
+
+  it('applies a real body change', () => {
+    assert.equal(
+      utils.shouldKeepEditorAfterModxPhpStrip(source, 'echo 2;', 'application/x-php'),
+      false
+    );
+  });
+
+  it('does not freeze html chunks or templates', () => {
+    assert.equal(
+      utils.shouldKeepEditorAfterModxPhpStrip(source, 'echo 1;', 'text/html'),
+      false
+    );
+    assert.equal(
+      utils.shouldKeepEditorAfterModxPhpStrip(source, 'echo 1;', 'text/x-smarty'),
+      false
+    );
+  });
+
+  it('rejects non-strings', () => {
+    assert.equal(
+      utils.shouldKeepEditorAfterModxPhpStrip(source, null, 'application/x-php'),
+      false
+    );
+  });
+});

@@ -71,6 +71,65 @@
         return fieldId === 'modx-rdata-buffer';
     }
 
+    var PHP_EDGE_TRIM = /[\u0000\u0009\u000A\u000B\u000D\u0020]/;
+    var PHP_TAIL_TRIM = /[\u0000\u000A\u000B\u000D\u0020]/;
+    var PHP_OPEN = '<' + '?';
+    var PHP_CLOSE = '?' + '>';
+
+    function trimChars(value, pattern) {
+        var start = 0;
+        var end = value.length;
+        while (start < end && pattern.test(value.charAt(start))) {
+            start++;
+        }
+        while (end > start && pattern.test(value.charAt(end - 1))) {
+            end--;
+        }
+        return value.slice(start, end);
+    }
+
+    /**
+     * modScript::set() stores snippet/plugin code without a PHP wrapper:
+     * trim, drop a leading open tag, drop a trailing close tag, trim again.
+     * The second trim does not remove tabs.
+     */
+    function stripModxScriptWrapper(value) {
+        if (typeof value !== 'string') {
+            return '';
+        }
+        var v = trimChars(value, PHP_EDGE_TRIM);
+        if (v.slice(0, PHP_OPEN.length) === PHP_OPEN) {
+            v = v.slice(PHP_OPEN.length);
+            if (v.slice(0, 3) === 'php') {
+                v = v.slice(3);
+            }
+        }
+        if (v.slice(-PHP_CLOSE.length) === PHP_CLOSE) {
+            v = v.slice(0, -PHP_CLOSE.length);
+        }
+        return trimChars(v, PHP_TAIL_TRIM);
+    }
+
+    function isPhpSourceContext(mimeType) {
+        return mimeType === 'application/x-php' || mimeType === 'text/x-php';
+    }
+
+    /**
+     * True when the saved value differs only by the PHP wrapper MODX removes.
+     * Limited to PHP mime types: snippets and plugins. HTML chunks can be
+     * switched to PHP mode and still store the wrapper, so mode alone is not
+     * enough.
+     */
+    function shouldKeepEditorAfterModxPhpStrip(current, incoming, mimeType) {
+        if (typeof current !== 'string' || typeof incoming !== 'string') {
+            return false;
+        }
+        if (!isPhpSourceContext(mimeType)) {
+            return false;
+        }
+        return stripModxScriptWrapper(current) === incoming;
+    }
+
     return {
         COLOR_LITERAL_REGEX: COLOR_LITERAL_REGEX,
         parseBoolSetting: parseBoolSetting,
@@ -78,6 +137,8 @@
         shouldOfferDraftRestore: shouldOfferDraftRestore,
         normalizeCssColor: normalizeCssColor,
         mimeSupportsColorPreview: mimeSupportsColorPreview,
-        shouldWaitForAsyncBuffer: shouldWaitForAsyncBuffer
+        shouldWaitForAsyncBuffer: shouldWaitForAsyncBuffer,
+        stripModxScriptWrapper: stripModxScriptWrapper,
+        shouldKeepEditorAfterModxPhpStrip: shouldKeepEditorAfterModxPhpStrip
     };
 }));
