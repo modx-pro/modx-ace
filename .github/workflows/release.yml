@@ -59,7 +59,7 @@ jobs:
       - name: Install MODX (CLI)
         working-directory: modx
         env:
-          MODX_ROOT: ${{ github.workspace }}
+          MODX_ROOT: ${{ github.workspace }}/modx
         run: |
           cat > setup/config.xml <<XML
           <modx>
@@ -93,6 +93,7 @@ jobs:
           sed -i 's/^[[:space:]]*//' setup/config.xml
           php setup/index.php --installmode=new --config="${MODX_ROOT}/setup/config.xml"
           test -f core/config/config.inc.php
+          php -r 'include "core/config/config.inc.php"; if (!isset($database_dsn) || strncmp((string) $database_dsn, "mysql:", 6) !== 0) { fwrite(STDERR, "MODX config has no mysql DSN\n"); exit(1); }'
 
       - name: Disable auto-install for release build
         run: sed -i "s/define('PKG_AUTO_INSTALL', true)/define('PKG_AUTO_INSTALL', false)/" _build/build.config.php
