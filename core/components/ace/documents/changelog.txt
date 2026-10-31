@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.12] - 2026-10-31
+
+### Fixed
+- Package upgrade now preserves `which_element_editor` when a custom editor is already selected. Ace is set as default only on fresh install or when the setting value is empty ([#56](https://github.com/modx-pro/modx-ace/issues/56)).
+- Setting description for `ace.theme` lists `kr_theme` instead of `kr` in both RU and EN lexicons, matching the actual theme module name ([#57](https://github.com/modx-pro/modx-ace/issues/57)).
+
 ## [1.9.11] - 2026-10-25
 
 ### Fixed
