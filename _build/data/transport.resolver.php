@@ -28,9 +28,21 @@ if ($pluginid = $object->get('id')) {
 
             $setting = $object->xpdo->getObject('modSystemSetting', ['key' => 'which_element_editor']);
             if ($setting) {
-                $setting->set('value', 'Ace');
-                $setting->save();
-                $log('✓ Set default element editor to Ace (which_element_editor)');
+                $current = trim((string) $setting->get('value'));
+                if ($options[xPDOTransport::PACKAGE_ACTION] === xPDOTransport::ACTION_INSTALL) {
+                    // On fresh install, always set default to Ace
+                    $setting->set('value', 'Ace');
+                    $setting->save();
+                    $log('✓ Set default element editor to Ace (which_element_editor) on install');
+                } elseif ($options[xPDOTransport::PACKAGE_ACTION] === xPDOTransport::ACTION_UPGRADE && $current === '') {
+                    // On upgrade, set only if the setting is empty
+                    $setting->set('value', 'Ace');
+                    $setting->save();
+                    $log('✓ Set default element editor to Ace (which_element_editor) on upgrade (was empty)');
+                } else {
+                    // Preserve existing custom editor choice
+                    $log('✓ which_element_editor already set to "' . $current . '", not overriding');
+                }
             }
             unset($setting);
 
