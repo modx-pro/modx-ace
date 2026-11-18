@@ -146,4 +146,31 @@ class HelpersTest extends TestCase
         $this->assertStringContainsString("snippet chunk\n", $contents);
         $this->assertStringContainsString('[[!getResources?', $contents);
     }
+
+    public function testResourceContentUsesAceWhenRichTextIsOff()
+    {
+        $this->assertTrue(aceShouldReplaceResourceContent(true, false, 'modDocument'));
+        $this->assertTrue(aceShouldReplaceResourceContent(true, 0, 'modDocument'));
+        $this->assertTrue(aceShouldReplaceResourceContent(true, '0', 'modDocument'));
+    }
+
+    public function testResourceContentSkipsAceWhenRichTextIsOn()
+    {
+        $this->assertFalse(aceShouldReplaceResourceContent(true, 1, 'modDocument'));
+        $this->assertFalse(aceShouldReplaceResourceContent(true, '1', 'modDocument'));
+    }
+
+    public function testResourceContentSkipsSpecialResourceTypes()
+    {
+        $this->assertFalse(aceShouldReplaceResourceContent(true, 0, 'modStaticResource'));
+        $this->assertFalse(aceShouldReplaceResourceContent(true, 0, 'modSymLink'));
+        $this->assertFalse(aceShouldReplaceResourceContent(true, 0, 'modWebLink'));
+        $this->assertFalse(aceShouldReplaceResourceContent(true, 0, 'modXMLRPCResource'));
+    }
+
+    public function testResourceContentUsesAceWhenEditorIsDisabled()
+    {
+        $this->assertTrue(aceShouldReplaceResourceContent(false, 1, 'modDocument'));
+        $this->assertTrue(aceShouldReplaceResourceContent(false, 0, 'modStaticResource'));
+    }
 }
