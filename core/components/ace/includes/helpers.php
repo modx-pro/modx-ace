@@ -61,6 +61,29 @@ if (!function_exists('aceMimeSupportsModxTags')) {
     }
 }
 
+if (!function_exists('aceShouldReplaceResourceContent')) {
+    /**
+     * Ace edits resource content only when MODX will not load an RTE for it.
+     * With use_editor=1 and richtext=1 the RTE from which_editor takes over #ta.
+     * With richtext=0 there is no RTE, so the plain textarea must be replaced
+     * even when which_editor points to another editor (#61).
+     *
+     * @param bool $useEditor
+     * @param mixed $richText
+     * @param string $classKey
+     * @return bool
+     */
+    function aceShouldReplaceResourceContent($useEditor, $richText, $classKey) {
+        if (!$useEditor) {
+            return true;
+        }
+        if ($richText) {
+            return false;
+        }
+        return !in_array($classKey, array('modStaticResource', 'modSymLink', 'modWebLink', 'modXMLRPCResource'), true);
+    }
+}
+
 if (!function_exists('aceIsResourceDataPage')) {
     /**
      * @param object $modx

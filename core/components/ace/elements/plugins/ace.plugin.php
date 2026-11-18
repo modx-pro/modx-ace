@@ -108,7 +108,8 @@ switch ($modx->event->name) {
         break;
     case 'OnDocFormPrerender':
         // Resource content: respect per-context use_editor (#35) and which_editor (#30).
-        // When another RTE is configured, do not replace #ta — MODX.loadRTE or plain textarea handles it.
+        // A configured RTE handles only richtext resources. With richtext off the
+        // content field is a plain textarea, so Ace must replace it (#61).
         if (!$modx->controller || empty($modx->controller->resourceArray)) {
             return;
         }
@@ -120,14 +121,12 @@ switch ($modx->event->name) {
             $mimeType = $html_elements_mime;
         }
 
-        if ($useEditor) {
-            $richText = $modx->controller->resourceArray['richtext'];
-            $classKey = $modx->controller->resourceArray['class_key'];
-            if ($richText || in_array($classKey, array('modStaticResource', 'modSymLink', 'modWebLink', 'modXMLRPCResource'))) {
-                $field = false;
-            } elseif (aceIsNonAceRichTextEditor($modx)) {
-                $field = false;
-            }
+        $richText = !empty($modx->controller->resourceArray['richtext']);
+        $classKey = isset($modx->controller->resourceArray['class_key'])
+            ? $modx->controller->resourceArray['class_key']
+            : '';
+        if (!aceShouldReplaceResourceContent($useEditor, $richText, $classKey)) {
+            $field = false;
         }
         $modxTags = aceMimeSupportsModxTags($mimeType);
         break;
