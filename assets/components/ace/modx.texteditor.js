@@ -470,6 +470,14 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
         var utils = (typeof MODx !== 'undefined' && MODx.ux)
             ? (MODx.ux.AceUtils || (MODx.ux.Ace && MODx.ux.Ace.Utils))
             : null;
+        // MODX 2 has no MODX 3 side nav / action bar layout: go truly fullscreen (#60).
+        if (utils && utils.isModx2 && utils.isModx2(MODx.config.version)) {
+            this.el.dom.style.top = '0px';
+            this.el.dom.style.left = '0px';
+            this.el.dom.style.right = '0px';
+            this.el.dom.style.bottom = '0px';
+            return;
+        }
         var header = document.getElementById('modx-header');
         var buttons = document.getElementById('modx-action-buttons');
         var insets = utils && utils.fullscreenInsets
@@ -488,6 +496,8 @@ MODx.ux.Ace = Ext.extend(Ext.ux.Ace, {
         }
         this.el.dom.style.top = '';
         this.el.dom.style.left = '';
+        this.el.dom.style.right = '';
+        this.el.dom.style.bottom = '';
     },
 
     bindFullscreenResize : function() {
@@ -933,6 +943,15 @@ MODx.ux.Ace.replaceComponent = function(id, mimeType, modxTags, options) {
     }
     textArea.on('destroy', function() {textEditor.destroy();});
     MODx.ux.Ace.DraftManager.bind(textArea, textEditor);
+
+    // Keep focus in the editor after a successful save so keyboard shortcuts
+    // like Ctrl+Z keep working immediately (#60).
+    var savePanel = MODx.ux.Ace.DraftManager.findFormPanel(textArea);
+    if (savePanel) {
+        savePanel.on('success', function() {
+            textEditor.focus();
+        });
+    }
     if (!modxTags)
         return;
     var dropTarget = MODx.load({
