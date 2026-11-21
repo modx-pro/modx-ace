@@ -71,6 +71,10 @@
         return fieldId === 'modx-rdata-buffer';
     }
 
+    function isModx2(version) {
+        return typeof version === 'string' && version.indexOf('2.') === 0;
+    }
+
     var PHP_EDGE_TRIM = /[\u0000\u0009\u000A\u000B\u000D\u0020]/;
     var PHP_TAIL_TRIM = /[\u0000\u000A\u000B\u000D\u0020]/;
     var PHP_OPEN = '<' + '?';
@@ -164,6 +168,7 @@
         normalizeCssColor: normalizeCssColor,
         mimeSupportsColorPreview: mimeSupportsColorPreview,
         shouldWaitForAsyncBuffer: shouldWaitForAsyncBuffer,
+        isModx2: isModx2,
         stripModxScriptWrapper: stripModxScriptWrapper,
         shouldKeepEditorAfterModxPhpStrip: shouldKeepEditorAfterModxPhpStrip,
         fullscreenInsets: fullscreenInsets

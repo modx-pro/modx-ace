@@ -90,6 +90,22 @@ describe('shouldWaitForAsyncBuffer', () => {
   });
 });
 
+describe('isModx2', () => {
+  it('detects 2.x versions', () => {
+    assert.equal(utils.isModx2('2.8.9-pl'), true);
+    assert.equal(utils.isModx2('2.8.9'), true);
+    assert.equal(utils.isModx2('2.8.8-pl'), true);
+  });
+
+  it('rejects 3.x and non-strings', () => {
+    assert.equal(utils.isModx2('3.2.4-pl'), false);
+    assert.equal(utils.isModx2('3.0.1-pl'), false);
+    assert.equal(utils.isModx2(null), false);
+    assert.equal(utils.isModx2(undefined), false);
+    assert.equal(utils.isModx2(''), false);
+  });
+});
+
 const PHP_OPEN = '<' + '?php';
 const PHP_SHORT = '<' + '?';
 const PHP_CLOSE = '?' + '>';
