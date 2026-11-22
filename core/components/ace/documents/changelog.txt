@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.14] - 2026-11-22
+
 ### Fixed
 - Resource content keeps the Ace editor when `richtext` is off, even if another RTE is configured in `which_editor` ([#61](https://github.com/modx-pro/modx-ace/issues/61)).
+- On MODX 2, fullscreen covers the whole viewport again, and the editor keeps focus after Save so Ctrl+Z works without an extra click ([#60](https://github.com/modx-pro/modx-ace/issues/60)).
 
 ## [1.9.12] - 2026-10-31
 
